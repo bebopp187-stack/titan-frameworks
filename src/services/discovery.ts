@@ -166,12 +166,12 @@ export const MCP_PUBLIC_TOOLS = [
     inputSchema: RESOLVE_SCHEMA,
   },
   {
-    name: "working_example",
+    name: "fetch_working_example",
     description: WORKING_EXAMPLE_DESCRIPTION,
     inputSchema: EXAMPLE_SCHEMA,
   },
   {
-    name: "xrpl_intent_tx",
+    name: "draft_xrpl_intent_tx",
     description: XRPL_INTENT_TX_DESCRIPTION,
     inputSchema: XRPL_INTENT_SCHEMA,
   },
@@ -331,7 +331,7 @@ export function openApiDocument() {
           operationId: "mcp",
           summary: "Streamable HTTP MCP (x402)",
           description:
-            "JSON-RPC MCP endpoint. initialize, ping, and tools/list are free. tools/call requires $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then runs a registered Titan tool (docs search, syntax, diagnose, review, rewrite, resolve_symbol, working_example, or xrpl_intent_tx).",
+            "JSON-RPC MCP endpoint. initialize, ping, and tools/list are free. tools/call requires $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then runs a registered Titan tool (docs search, syntax, diagnose, review, rewrite, resolve_symbol, fetch_working_example, or draft_xrpl_intent_tx).",
           "x-payment-info": {
             protocols: ["x402"],
             price: { mode: "fixed", currency: "USD", amount: "0.001" },

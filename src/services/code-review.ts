@@ -185,7 +185,7 @@ export function rewriteFrameworkCode(
   }
   if (leftover.length > 0) {
     notes.push(
-      "Leftover hits are unsafe call-site transforms (e.g. LLMChain(...)). Apply those by hand or use working_example / fetch_latest_syntax.",
+      "Leftover hits are unsafe call-site transforms (e.g. LLMChain(...)). Apply those by hand or use fetch_working_example / fetch_latest_syntax.",
     );
   }
 

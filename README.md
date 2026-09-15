@@ -17,8 +17,8 @@ Agent discovery: [`llms.txt`](https://titan-frameworks-production.up.railway.app
 | `review_framework_code` | Lint a snippet for dead APIs before it crashes. Returns hunks, does not execute |
 | `rewrite_framework_code` | Apply conservative catalog rewrites; leftover lists unsafe call sites |
 | `resolve_symbol` | Package, install, import, and call shape for one API name |
-| `working_example` | Complete runnable file for a goal (agent, rag, payment, …) |
-| `xrpl_intent_tx` | Typed XRPL tx skeleton. Never submits or moves funds |
+| `fetch_working_example` | Complete runnable file for a goal (agent, rag, payment, …) |
+| `draft_xrpl_intent_tx` | Typed XRPL tx skeleton. Never submits or moves funds |
 
 ## Connect a client
 

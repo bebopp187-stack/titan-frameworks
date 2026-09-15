@@ -7,9 +7,9 @@ import { timedQuery } from "../services/query-log.js";
 
 export function registerXrplIntentTxTool(server: McpServer): void {
   server.registerTool(
-    "xrpl_intent_tx",
+    "draft_xrpl_intent_tx",
     {
-      title: "XRPL Intent Transaction",
+      title: "Draft XRPL Intent Transaction",
       description: XRPL_INTENT_TX_DESCRIPTION,
       inputSchema: XrplIntentInputSchema,
       outputSchema: XrplIntentOutputSchema,
@@ -17,7 +17,7 @@ export function registerXrplIntentTxTool(server: McpServer): void {
     },
     async ({ intent, language }) => {
       try {
-        return await timedQuery("xrpl", "xrpl_intent_tx", async () =>
+        return await timedQuery("xrpl", "draft_xrpl_intent_tx", async () =>
           jsonToolResult(xrplIntentTx(intent, language)),
         );
       } catch (err) {

@@ -162,13 +162,13 @@ Map an API name to the current package, install line, import, and call shape. Pa
 }
 ```
 
-### working_example
+### fetch_working_example
 
 One complete runnable file for a goal (agent, rag, chat, payment, rlusd). Paid `tools/call`. Does not execute the example.
 
 ```json
 {
-  "name": "working_example",
+  "name": "fetch_working_example",
   "input": {
     "type": "object",
     "required": ["framework", "goal"],
@@ -182,13 +182,13 @@ One complete runnable file for a goal (agent, rag, chat, payment, rlusd). Paid `
 }
 ```
 
-### xrpl_intent_tx
+### draft_xrpl_intent_tx
 
 Typed xrpl.js / xrpl-py skeleton for payment, trustline, rlusd, or channel. Never submits, signs, or moves funds. Paid `tools/call`.
 
 ```json
 {
-  "name": "xrpl_intent_tx",
+  "name": "draft_xrpl_intent_tx",
   "input": {
     "type": "object",
     "required": ["intent"],
@@ -211,4 +211,4 @@ Refresh: nightly in production when the index is older than 24 hours. Local: `np
 
 ## Agent notes
 
-Keep tool arguments short. Responses are already truncated for context windows (top hits, ~1.2k chars/chunk). Prefer `fetch_latest_syntax` or `working_example` before pasting large docs into a prompt. Lint with `review_framework_code` before running agent-written code.
+Keep tool arguments short. Responses are already truncated for context windows (top hits, ~1.2k chars/chunk). Prefer `fetch_latest_syntax` or `fetch_working_example` before pasting large docs into a prompt. Lint with `review_framework_code` before running agent-written code.

@@ -8,9 +8,9 @@ import { timedQuery } from "../services/query-log.js";
 
 export function registerWorkingExampleTool(server: McpServer): void {
   server.registerTool(
-    "working_example",
+    "fetch_working_example",
     {
-      title: "Working Example",
+      title: "Fetch Working Example",
       description: WORKING_EXAMPLE_DESCRIPTION,
       inputSchema: WorkingExampleInputSchema,
       outputSchema: WorkingExampleOutputSchema,
@@ -19,7 +19,7 @@ export function registerWorkingExampleTool(server: McpServer): void {
     async ({ framework, goal, language, runtime }) => {
       try {
         const id = normalizeFramework(framework);
-        return await timedQuery(id, "working_example", async () =>
+        return await timedQuery(id, "fetch_working_example", async () =>
           jsonToolResult(workingExample(id, goal, language, runtime)),
         );
       } catch (err) {
