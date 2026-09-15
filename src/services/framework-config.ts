@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { FRAMEWORK_IDS, type FrameworkId } from "../types/index.js";
-import { dataDir } from "./frameworks.js";
+import { packagedDataDir, stateDir } from "./frameworks.js";
 
 export type FrameworkToggles = Record<FrameworkId, boolean>;
 
@@ -18,15 +18,20 @@ let memory = defaults();
 let loaded = false;
 
 function filePath(): string {
-  return path.join(dataDir(), FILE);
+  return path.join(stateDir(), FILE);
+}
+
+function packagedPath(): string {
+  return path.join(packagedDataDir(), FILE);
 }
 
 export function getFrameworkToggles(): FrameworkToggles {
   if (!loaded) {
     loaded = true;
     try {
-      if (existsSync(filePath())) {
-        const parsed = JSON.parse(readFileSync(filePath(), "utf8")) as Partial<FrameworkToggles>;
+      const source = existsSync(filePath()) ? filePath() : packagedPath();
+      if (existsSync(source)) {
+        const parsed = JSON.parse(readFileSync(source, "utf8")) as Partial<FrameworkToggles>;
         memory = { ...defaults(), ...parsed };
       }
     } catch {
@@ -43,7 +48,7 @@ export function setFrameworkToggles(next: Partial<FrameworkToggles>): FrameworkT
   }
   memory = current;
   try {
-    const dir = dataDir();
+    const dir = stateDir();
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     writeFileSync(filePath(), `${JSON.stringify(memory, null, 2)}\n`, "utf8");
   } catch {

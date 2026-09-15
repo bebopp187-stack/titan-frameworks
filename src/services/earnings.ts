@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { dataDir } from "./frameworks.js";
+import { stateDir } from "./frameworks.js";
 
 export interface EarningsSnapshot {
   xrpDropsEarned: number;
@@ -32,7 +32,7 @@ let memory = empty();
 let loaded = false;
 
 function filePath(): string {
-  return path.join(dataDir(), FILE);
+  return path.join(stateDir(), FILE);
 }
 
 function load(): EarningsSnapshot {
@@ -51,7 +51,7 @@ function load(): EarningsSnapshot {
 
 function persist(): void {
   try {
-    const dir = dataDir();
+    const dir = stateDir();
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     writeFileSync(filePath(), `${JSON.stringify(memory, null, 2)}\n`, "utf8");
   } catch {

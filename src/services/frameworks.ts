@@ -68,11 +68,26 @@ export function projectRoot(): string {
   return process.cwd();
 }
 
-export function dataDir(): string {
+/** Packaged JSON shipped in git (docs index, catalogs, seed). */
+export function packagedDataDir(): string {
   return path.join(projectRoot(), "src", "data");
 }
 
+/**
+ * Writable runtime state (earnings, query log, live re-index).
+ * Railway volume: DATA_DIR or RAILWAY_VOLUME_MOUNT_PATH (usually /data).
+ */
+export function stateDir(): string {
+  const override = process.env.DATA_DIR?.trim() || process.env.RAILWAY_VOLUME_MOUNT_PATH?.trim();
+  if (override) return path.resolve(override);
+  return packagedDataDir();
+}
+
+export function dataDir(): string {
+  return packagedDataDir();
+}
+
 export function readJsonFile<T>(filename: string): T {
-  const full = path.join(dataDir(), filename);
+  const full = path.join(packagedDataDir(), filename);
   return JSON.parse(readFileSync(full, "utf8")) as T;
 }

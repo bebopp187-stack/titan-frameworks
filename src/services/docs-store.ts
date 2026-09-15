@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import type { DocChunk, DocsIndex, FrameworkId } from "../types/index.js";
-import { dataDir } from "./frameworks.js";
+import { packagedDataDir, stateDir } from "./frameworks.js";
 
 const INDEX_FILE = "docs-index.json";
 const SEED_FILE = "seed-fallback.json";
@@ -24,11 +24,12 @@ function mergeSeed(live: DocsIndex, seed: DocsIndex): DocsIndex {
 }
 
 export function loadDocsIndex(): DocsIndex {
-  const dir = dataDir();
-  const livePath = path.join(dir, INDEX_FILE);
-  const seedPath = path.join(dir, SEED_FILE);
+  const packaged = packagedDataDir();
+  const stateLive = path.join(stateDir(), INDEX_FILE);
+  const packagedLive = path.join(packaged, INDEX_FILE);
+  const seedPath = path.join(packaged, SEED_FILE);
   const seed = readIndex(seedPath);
-  const file = existsSync(livePath) ? livePath : seedPath;
+  const file = existsSync(stateLive) ? stateLive : existsSync(packagedLive) ? packagedLive : seedPath;
   const mtimeMs = statSync(file).mtimeMs;
   if (!cache || cache.mtimeMs !== mtimeMs) {
     const live = readIndex(file);

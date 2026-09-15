@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import type { DocChunk, DocsIndex, FrameworkId } from "../types/index.js";
 import { XRPL_CRAWL_TARGET, type CrawlSourceSpec } from "../indexer/crawl.js";
-import { dataDir, FRAMEWORK_META, readJsonFile } from "./frameworks.js";
+import { FRAMEWORK_META, packagedDataDir, readJsonFile, stateDir } from "./frameworks.js";
 import { toCleanMarkdown } from "./html-to-markdown.js";
 import { estimateTokens } from "./search.js";
 
@@ -268,13 +268,16 @@ export interface IndexProgress {
 }
 
 function previousIndex(): DocsIndex | undefined {
-  const livePath = path.join(dataDir(), "docs-index.json");
-  if (!existsSync(livePath)) return undefined;
-  try {
-    return JSON.parse(readFileSync(livePath, "utf8")) as DocsIndex;
-  } catch {
-    return undefined;
+  for (const dir of [stateDir(), packagedDataDir()]) {
+    const livePath = path.join(dir, "docs-index.json");
+    if (!existsSync(livePath)) continue;
+    try {
+      return JSON.parse(readFileSync(livePath, "utf8")) as DocsIndex;
+    } catch {
+      continue;
+    }
   }
+  return undefined;
 }
 
 export async function buildDocsIndex(opts?: {
@@ -349,7 +352,8 @@ export function writeDocsIndex(index: DocsIndex): { jsonPath: string; sqlitePath
     }
   }
   const deduped: DocsIndex = { ...index, frameworks, chunks };
-  const dir = dataDir();
+  const dir = stateDir();
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   const jsonPath = path.join(dir, "docs-index.json");
   writeFileSync(jsonPath, `${JSON.stringify(deduped, null, 2)}\n`, "utf8");
 
