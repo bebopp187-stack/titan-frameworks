@@ -71,20 +71,23 @@ Railway uses `railway.toml` (`npm run start`). Vercel rewrites to `api/index.ts`
 
 ## x402 micropayments
 
-Production billing is **on**. Missing payment headers on `/mcp` return **402** with `accepts[]` for Base USDC (`eip155:8453`, PayAI) and XRPL (`xrpl:0`, T54). A raw USDC transfer is not an x402 proof — clients retry `/mcp` with `PAYMENT-SIGNATURE`.
+**Production billing is on.** `POST https://titan-frameworks-production.up.railway.app/mcp` without a payment header returns **402**.
 
-| Flag | Effect |
-| --- | --- |
-| `X402_ENABLED=true` | Gate `/mcp` |
-| `X402_USDC_LIVE=true` | Verify/settle USDC through PayAI |
-| `X402_XRPL_LIVE=true` | Verify/settle XRP/RLUSD through T54 |
-| `X402_PAY_TO` | Base USDC payee (default merchant address in repo docs) |
+| Rail | Price | Network | Facilitator |
+| --- | --- | --- | --- |
+| USDC | **$0.001** | Base (`eip155:8453`) | PayAI |
+| XRP | **1000 drops** (0.001 XRP) | XRPL mainnet (`xrpl:0`) | T54 |
+| RLUSD | **0.001** | XRPL mainnet (`xrpl:0`) | T54 |
 
-Local mock: set `X402_ENABLED=true` without the live flags.
+A raw wallet transfer is not an x402 proof. Clients retry `/mcp` with `PAYMENT-SIGNATURE` / `X-PAYMENT`. Local stdio (`npm run dev`) does not charge.
 
-## Private admin (`/admin`)
+To reproduce the gate locally: `X402_ENABLED=true` (mock) plus `X402_USDC_LIVE=true` / `X402_XRPL_LIVE=true` for live verify/settle.
 
-Password-gated dashboard at `/admin`. Set `ADMIN_SECRET_KEY`. Unauthenticated API requests receive 401. Do not publish this URL.
+## Password-gated admin
+
+Production dashboard: `https://titan-frameworks-production.up.railway.app/admin`
+
+It is **not** a public stats page. Login is a password checked against `ADMIN_SECRET_KEY`. Unauthenticated `/api/admin/*` calls return **401**. The old public `/admin/api/stats` route is gone (**404**).
 
 ## Layout
 
