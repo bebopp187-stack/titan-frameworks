@@ -14,6 +14,7 @@
     "start": "node dist/http.js",
     "start:stdio": "node dist/index.js",
     "index-docs": "tsx scripts/index-docs.ts",
+    "x402-smoke": "tsx scripts/x402-smoke.ts",
     "test": "tsx scripts/smoke.ts",
     "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },
@@ -41,10 +42,13 @@
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@x402/evm": "^2.25.0",
+    "@x402/fetch": "^2.25.0",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "viem": "^2.56.5"
   }
 }

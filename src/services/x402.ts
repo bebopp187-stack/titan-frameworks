@@ -147,10 +147,19 @@ export function xrplAccepts(resource: string) {
   return [xrp, rlusd];
 }
 
+export function mcpResourceInfo(url: string) {
+  return {
+    url,
+    description: "Titan Frameworks MCP tool call",
+    mimeType: "application/json",
+  };
+}
+
 export function paymentRequiredBody(resource: string) {
   return {
     x402Version: 2,
     error: "PAYMENT_REQUIRED",
+    resource: mcpResourceInfo(resource),
     accepts: [usdcAccept(resource), ...xrplAccepts(resource)],
   };
 }
