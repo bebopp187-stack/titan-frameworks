@@ -361,7 +361,7 @@ export function openApiDocument() {
     openapi: "3.1.0",
     info: {
       title: "Titan Frameworks MCP",
-      version: "1.0.0",
+      version: "1.0.1",
       description: SERVER_DESCRIPTION_PAID,
     },
     servers: [{ url: PRODUCTION_ORIGIN }],

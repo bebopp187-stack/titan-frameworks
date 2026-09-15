@@ -1,6 +1,6 @@
 {
   "name": "titan-frameworks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs, plus runnable examples and XRPL tx skeletons.",
   "type": "module",
   "main": "dist/http.js",

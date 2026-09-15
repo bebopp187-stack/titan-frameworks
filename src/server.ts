@@ -6,7 +6,7 @@ import { AGENT_INSTRUCTIONS, SERVER_DESCRIPTION } from "./mcp/tool-copy.js";
 
 export const SERVER_INFO = {
   name: "titan-frameworks",
-  version: "1.0.0",
+  version: "1.0.1",
   title: "Titan Frameworks (LangChain, LlamaIndex, Ollama, XRPL)",
   websiteUrl: "https://titan-frameworks-production.up.railway.app/llms.txt",
 };
