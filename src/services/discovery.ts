@@ -188,7 +188,51 @@ export function mcpServerCard(version: string) {
 export function x402WellKnownIndex() {
   return {
     version: 1,
-    resources: ["POST /mcp"],
+    resources: [PRODUCTION_MCP_URL],
+  };
+}
+
+export function openApiDocument() {
+  return {
+    openapi: "3.1.0",
+    info: {
+      title: "Titan Frameworks MCP",
+      version: "1.0.0",
+      description:
+        "Paid Streamable HTTP MCP for live LangChain, LlamaIndex, Ollama, and XRPL docs.",
+    },
+    servers: [{ url: PRODUCTION_ORIGIN }],
+    paths: {
+      "/mcp": {
+        post: {
+          operationId: "mcp",
+          summary: "Streamable HTTP MCP (x402)",
+          description:
+            "JSON-RPC MCP endpoint. Pay $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then call search_ai_framework_docs, fetch_latest_syntax, or diagnose_framework_error.",
+          "x-payment-info": {
+            protocols: ["x402"],
+            price: { mode: "fixed", currency: "USD", amount: "0.001" },
+          },
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: discoveryOutputSchema().input.schema,
+                example: discoveryOutputSchema().input.body,
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "MCP JSON-RPC response",
+            },
+            "402": {
+              description: "Payment required (x402)",
+            },
+          },
+        },
+      },
+    },
   };
 }
 

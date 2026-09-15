@@ -1,6 +1,9 @@
 node_modules/
 dist/
 .env
+mcp-publisher.exe
+mcp-publisher
+.git/COMMIT_EDITMSG_AGENT
 *.log
 .DS_Store
 coverage/

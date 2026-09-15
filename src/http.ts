@@ -6,7 +6,7 @@ import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createTitanServer, SERVER_INFO } from "./server.js";
 import { attachX402, paymentRequiredBody, publicMcpResource, x402MockMiddleware, xrplNetwork, xrplPriceDrops } from "./services/x402.js";
-import { MCP_PUBLIC_TOOLS, mcpServerCard, x402WellKnownIndex } from "./services/discovery.js";
+import { MCP_PUBLIC_TOOLS, mcpServerCard, openApiDocument, x402WellKnownIndex } from "./services/discovery.js";
 import { projectRoot } from "./services/frameworks.js";
 import { loadDocsIndex } from "./services/docs-store.js";
 import { recordMcpCall } from "./services/earnings.js";
@@ -72,6 +72,10 @@ app.get("/tools", (_req, res) => {
       usdcLive: process.env.X402_USDC_LIVE === "true",
     },
   });
+});
+
+app.get("/openapi.json", (_req, res) => {
+  res.json(openApiDocument());
 });
 
 app.get("/.well-known/x402", (_req, res) => {
