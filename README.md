@@ -11,18 +11,20 @@ Agent discovery: [`llms.txt`](https://titan-frameworks-production.up.railway.app
 
 | Tool | Purpose |
 | --- | --- |
-| `search_ai_framework_docs` | Keyword search over local Markdown. Use for concepts/symbols; not stack traces |
-| `fetch_latest_syntax` | Working snippets and migration notes for one topic. Use when writing a fragment |
-| `diagnose_framework_error` | Stack-trace → deprecated API → exact fix. Use only when you have an error |
 | `review_framework_code` | Lint a snippet for dead APIs before it crashes. Returns hunks, does not execute |
 | `rewrite_framework_code` | Apply conservative catalog rewrites; leftover lists unsafe call sites |
+| `diagnose_framework_error` | Stack-trace → deprecated API → exact fix. Use only when you have an error |
 | `resolve_symbol` | Package, install, import, and call shape for one API name |
 | `fetch_working_example` | Complete runnable file for a goal (agent, rag, payment, …) |
+| `fetch_latest_syntax` | Working snippets and migration notes for one topic. Use when writing a fragment |
+| `search_ai_framework_docs` | Keyword search over local Markdown. Use for concepts/symbols; not stack traces |
 | `draft_xrpl_intent_tx` | Typed XRPL tx skeleton. Never submits or moves funds |
-| `list_supported_frameworks` | Enumerate framework ids, aliases, and catalog topics |
+| `list_supported_frameworks` | Enumerate framework ids, aliases, and catalog topics (**free** `tools/call`) |
 | `list_known_deprecations` | Full deprecation catalog for one framework or all four |
 
-Pick one: stack trace → `diagnose_framework_error`; source about to run → `review_framework_code`; need a patched file → `rewrite_framework_code`; know the symbol → `resolve_symbol`; need a full file → `fetch_working_example`; topic fragment → `fetch_latest_syntax`; concept → `search_ai_framework_docs`; XRPL tx → `draft_xrpl_intent_tx`; which frameworks → `list_supported_frameworks`; all deprecations → `list_known_deprecations`.
+Prompts: `migrate_framework_code`, `diagnose_stack_trace`, `start_from_example`.
+
+Pick one: source about to run → `review_framework_code`; need a patched file → `rewrite_framework_code`; stack trace → `diagnose_framework_error`; know the symbol → `resolve_symbol`; need a full file → `fetch_working_example`; topic fragment → `fetch_latest_syntax`; concept → `search_ai_framework_docs`; XRPL tx → `draft_xrpl_intent_tx`; which frameworks → `list_supported_frameworks`; all deprecations → `list_known_deprecations`.
 
 ## Connect a client
 
@@ -50,7 +52,7 @@ To pay production from Cursor, enable **titan-frameworks-paid** in MCP settings 
 | `GET /.well-known/x402` | x402scan resource index |
 | `GET /.well-known/x402.json` | full payment requirements + bazaar metadata |
 | `GET /.well-known/mcp/server-card.json` | Smithery static card |
-| `ALL /mcp` | Streamable HTTP MCP. Handshake/`tools/list` free; `tools/call` paid |
+| `ALL /mcp` | Streamable HTTP MCP. Handshake/`tools/list`/`list_supported_frameworks` free; other `tools/call` paid |
 
 ## Run locally (stdio)
 
@@ -84,7 +86,7 @@ Railway uses `railway.toml` (`npm run start`). Vercel rewrites to `api/index.ts`
 
 ## x402 micropayments
 
-**Production billing is on.** Unpaid `tools/call` on `POST https://titan-frameworks-production.up.railway.app/mcp` returns **402**. `initialize`, `ping`, and `tools/list` are free so directories can health-check the connector.
+**Production billing is on.** Unpaid `tools/call` on `POST https://titan-frameworks-production.up.railway.app/mcp` returns **402**, except `list_supported_frameworks` which is free. `initialize`, `ping`, and `tools/list` are free so directories can health-check the connector.
 
 | Rail | Price | Network | Facilitator |
 | --- | --- | --- | --- |

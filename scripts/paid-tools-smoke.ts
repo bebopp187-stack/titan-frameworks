@@ -22,6 +22,7 @@ agent = initialize_agent(tools, llm)
 type Case = {
   name: string;
   arguments: Record<string, unknown>;
+  free?: boolean;
   ok: (payload: Record<string, unknown>) => string | null;
 };
 
@@ -75,6 +76,7 @@ const CASES: Case[] = [
   {
     name: "list_supported_frameworks",
     arguments: {},
+    free: true,
     ok: (p) => (Number(p.count) === 4 && Array.isArray(p.ids) && (p.ids as unknown[]).includes("xrpl") ? null : `count=${String(p.count)}`),
   },
   {
@@ -182,7 +184,7 @@ async function main(): Promise<void> {
         failed += 1;
         continue;
       }
-      if (!settled) {
+      if (!settled && !test.free) {
         console.log(`FAIL HTTP ${res.status} no payment receipt (${ms}ms)`);
         failed += 1;
         continue;
@@ -208,7 +210,7 @@ async function main(): Promise<void> {
         failed += 1;
         continue;
       }
-      console.log(`ok HTTP ${res.status} paid (${ms}ms) ${preview(payload)}`);
+      console.log(`ok HTTP ${res.status} ${test.free ? "free" : "paid"} (${ms}ms) ${preview(payload)}`);
     } catch (err) {
       console.log(`FAIL ${err instanceof Error ? err.message : String(err)}`);
       failed += 1;

@@ -11,13 +11,13 @@ import { registerListFrameworksTool } from "./list-frameworks.js";
 import { registerListDeprecationsTool } from "./list-deprecations.js";
 
 export function registerTools(server: McpServer): void {
-  registerSearchDocsTool(server);
-  registerFetchSyntaxTool(server);
-  registerDiagnoseErrorTool(server);
   registerReviewCodeTool(server);
   registerRewriteCodeTool(server);
+  registerDiagnoseErrorTool(server);
   registerResolveSymbolTool(server);
   registerWorkingExampleTool(server);
+  registerFetchSyntaxTool(server);
+  registerSearchDocsTool(server);
   registerXrplIntentTxTool(server);
   registerListFrameworksTool(server);
   registerListDeprecationsTool(server);

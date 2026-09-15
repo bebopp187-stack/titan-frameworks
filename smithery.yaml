@@ -1,7 +1,7 @@
 version: 1
 
 name: titan-frameworks
-displayName: Titan Frameworks
+displayName: Titan Frameworks (LangChain, LlamaIndex, Ollama, XRPL)
 description: Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs, plus runnable examples and XRPL tx skeletons. $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD.
 homepage: https://titan-frameworks-production.up.railway.app
 documentation: https://titan-frameworks-production.up.railway.app/llms.txt
@@ -15,7 +15,6 @@ remote:
 
 categories:
   - developer-tools
-  - documentation
 
 keywords:
   - langchain
@@ -30,7 +29,7 @@ keywords:
 features:
   tools: true
   resources: true
-  prompts: false
+  prompts: true
 
 maintainer:
   name: Andrew

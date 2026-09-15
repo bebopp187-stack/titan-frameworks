@@ -16,32 +16,41 @@ Production HTTP `/mcp` is billed with x402 at **$0.001 USDC on Base** or **1000 
 | GET | `/tools` | free | none |
 | GET/DELETE | `/mcp` | free | none (Streamable HTTP session) |
 | POST | `/mcp` `initialize` / `ping` / `tools/list` | free | none |
-| POST | `/mcp` `tools/call` | $0.001 USDC on Base (`eip155:8453`) **or** 1000 drops XRP / RLUSD on XRPL mainnet (`xrpl:0`) | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
+| POST | `/mcp` `tools/call` `list_supported_frameworks` | free | none |
+| POST | `/mcp` `tools/call` (all other tools) | $0.001 USDC on Base (`eip155:8453`) **or** 1000 drops XRP / RLUSD on XRPL mainnet (`xrpl:0`) | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
 | GET | `/admin` | private (password login, not a public dashboard) | `ADMIN_SECRET_KEY`. Live: `https://titan-frameworks-production.up.railway.app/admin`. Old `/admin/api/stats` is 404. |
 
 Local stdio mode (`npx tsx src/index.ts`) does not charge.
 
 ## Pricing
 
-- **Tool calls over HTTP `/mcp`:** `0.001` USDC on Base **or** `1000` drops XRP (`0.001` XRP) / RLUSD on XRPL mainnet
+- **Tool calls over HTTP `/mcp`:** `0.001` USDC on Base **or** `1000` drops XRP (`0.001` XRP) / RLUSD on XRPL mainnet. Exception: `list_supported_frameworks` is free.
 - **Networks:** Base mainnet (`eip155:8453`) and XRPL mainnet (`xrpl:0`)
 - **Assets:** USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, native `XRP`, RLUSD (`524C555344…` + issuer)
 - **Scheme:** `exact` (x402)
-- **Production:** billing is live (`X402_ENABLED=true`, `X402_USDC_LIVE=true`, `X402_XRPL_LIVE=true`). Missing payment headers on `tools/call` return HTTP 402 with machine-readable `accepts[]` plus PayAI bazaar / x402scan discovery metadata. Handshake methods stay unpaid.
+- **Production:** billing is live (`X402_ENABLED=true`, `X402_USDC_LIVE=true`, `X402_XRPL_LIVE=true`). Missing payment headers on paid `tools/call` return HTTP 402 with machine-readable `accepts[]` plus PayAI bazaar / x402scan discovery metadata. Handshake methods and `list_supported_frameworks` stay unpaid.
 - **Live Base USDC:** PayAI facilitator `https://facilitator.payai.network`.
 - **Live XRPL:** T54 facilitator `https://xrpl-facilitator-mainnet.t54.ai` (`XRPL_NETWORK=xrpl:0`).
 
 ## Which tool to call
 
-- Stack trace / exception → `diagnose_framework_error`
+Prefer a labeled prompt when it matches: `migrate_framework_code`, `diagnose_stack_trace`, `start_from_example`.
+
 - Source you are about to run → `review_framework_code`, then `rewrite_framework_code` for a patched file
+- Stack trace / exception → `diagnose_framework_error`
 - Know the API name, not the import → `resolve_symbol`
 - Need a complete runnable file → `fetch_working_example`
 - Need a topic fragment → `fetch_latest_syntax`
 - Open-ended concept → `search_ai_framework_docs`
-- Which framework ids this server covers → `list_supported_frameworks`
-- Full deprecation catalog (no stack trace) → `list_known_deprecations`
 - XRPL Payment / TrustSet / RLUSD / channel → `draft_xrpl_intent_tx` (never submits)
+- Which framework ids this server covers → `list_supported_frameworks` (free)
+- Full deprecation catalog (no stack trace) → `list_known_deprecations`
+
+## Prompts
+
+- `migrate_framework_code` — review then rewrite a snippet
+- `diagnose_stack_trace` — match a traceback to a known deprecated API
+- `start_from_example` — fetch a complete runnable file
 
 ## Tools (JSON Schema)
 

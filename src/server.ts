@@ -1,12 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerTools } from "./tools/index.js";
+import { registerPrompts } from "./mcp/prompts.js";
 import { loadDocsIndex } from "./services/docs-store.js";
 import { AGENT_INSTRUCTIONS, SERVER_DESCRIPTION } from "./mcp/tool-copy.js";
 
 export const SERVER_INFO = {
   name: "titan-frameworks",
   version: "1.0.0",
-  title: "Titan Frameworks",
+  title: "Titan Frameworks (LangChain, LlamaIndex, Ollama, XRPL)",
   websiteUrl: "https://titan-frameworks-production.up.railway.app/llms.txt",
 };
 
@@ -23,6 +24,7 @@ export function createTitanServer(): McpServer {
   );
 
   registerTools(server);
+  registerPrompts(server);
 
   server.registerResource(
     "index-status",

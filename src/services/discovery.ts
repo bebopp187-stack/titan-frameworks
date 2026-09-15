@@ -1,5 +1,6 @@
 /** Public MCP tool + x402 bazaar metadata for Smithery, PayAI, x402scan, and the MCP registry. */
 
+import { MCP_PUBLIC_PROMPTS } from "../mcp/prompts.js";
 import {
   AGENT_INSTRUCTIONS,
   DIAGNOSE_ERROR_DESCRIPTION,
@@ -156,21 +157,6 @@ const LIST_DEPRECATIONS_SCHEMA = {
 
 export const MCP_PUBLIC_TOOLS = [
   {
-    name: "search_ai_framework_docs",
-    description: SEARCH_DOCS_DESCRIPTION,
-    inputSchema: SEARCH_SCHEMA,
-  },
-  {
-    name: "fetch_latest_syntax",
-    description: FETCH_SYNTAX_DESCRIPTION,
-    inputSchema: SYNTAX_SCHEMA,
-  },
-  {
-    name: "diagnose_framework_error",
-    description: DIAGNOSE_ERROR_DESCRIPTION,
-    inputSchema: DIAGNOSE_SCHEMA,
-  },
-  {
     name: "review_framework_code",
     description: REVIEW_CODE_DESCRIPTION,
     inputSchema: REVIEW_SCHEMA,
@@ -181,6 +167,11 @@ export const MCP_PUBLIC_TOOLS = [
     inputSchema: REVIEW_SCHEMA,
   },
   {
+    name: "diagnose_framework_error",
+    description: DIAGNOSE_ERROR_DESCRIPTION,
+    inputSchema: DIAGNOSE_SCHEMA,
+  },
+  {
     name: "resolve_symbol",
     description: RESOLVE_SYMBOL_DESCRIPTION,
     inputSchema: RESOLVE_SCHEMA,
@@ -189,6 +180,16 @@ export const MCP_PUBLIC_TOOLS = [
     name: "fetch_working_example",
     description: WORKING_EXAMPLE_DESCRIPTION,
     inputSchema: EXAMPLE_SCHEMA,
+  },
+  {
+    name: "fetch_latest_syntax",
+    description: FETCH_SYNTAX_DESCRIPTION,
+    inputSchema: SYNTAX_SCHEMA,
+  },
+  {
+    name: "search_ai_framework_docs",
+    description: SEARCH_DOCS_DESCRIPTION,
+    inputSchema: SEARCH_SCHEMA,
   },
   {
     name: "draft_xrpl_intent_tx",
@@ -207,22 +208,30 @@ export const MCP_PUBLIC_TOOLS = [
   },
 ] as const;
 
-const SEARCH_EXAMPLE = { framework: "langchain", query: "LCEL agent RAG" };
-
-const SEARCH_OUTPUT_EXAMPLE = {
+const REVIEW_EXAMPLE = {
   framework: "langchain",
-  query: "LCEL agent RAG",
-  hitCount: 1,
-  hits: [
+  code: "from langchain.chains import LLMChain\nchain = LLMChain(llm=llm, prompt=prompt)\n",
+  filename: "legacy.py",
+};
+
+const REVIEW_OUTPUT_EXAMPLE = {
+  framework: "langchain",
+  matched: true,
+  issueCount: 1,
+  issues: [
     {
-      id: "langchain-lcel",
-      title: "LCEL",
-      url: "https://docs.langchain.com",
-      score: 1,
-      headingPath: "LCEL",
-      chunk: "LangChain Expression Language composes runnables with the pipe operator.",
+      id: "lc-llmchain",
+      deprecated: "LLMChain / ConversationChain",
+      replacement: "LCEL: prompt | model | parser",
+      pattern: "LLMChain",
+      line: 1,
+      excerpt: "from langchain.chains import LLMChain",
+      reason: "Classic chains are deprecated.",
+      fix: "Replace LLMChain with prompt | model | parser.",
+      hunk: "--- a/legacy.py\n+++ b/legacy.py\n@@ -1,1 +1,1 @@\n-from langchain.chains import LLMChain\n+from langchain_core.prompts import ChatPromptTemplate",
     },
   ],
+  hints: ["Review is lint-before-crash."],
 };
 
 const MCP_CALL_EXAMPLE = {
@@ -230,8 +239,8 @@ const MCP_CALL_EXAMPLE = {
   id: 1,
   method: "tools/call",
   params: {
-    name: "search_ai_framework_docs",
-    arguments: SEARCH_EXAMPLE,
+    name: "review_framework_code",
+    arguments: REVIEW_EXAMPLE,
   },
 };
 
@@ -242,15 +251,15 @@ export function bazaarExtensions() {
       info: {
         input: {
           type: "mcp",
-          toolName: "search_ai_framework_docs",
+          toolName: "review_framework_code",
           description: MCP_PUBLIC_TOOLS[0].description,
           transport: "streamable-http",
-          inputSchema: SEARCH_SCHEMA,
-          example: SEARCH_EXAMPLE,
+          inputSchema: REVIEW_SCHEMA,
+          example: REVIEW_EXAMPLE,
         },
         output: {
           type: "json",
-          example: SEARCH_OUTPUT_EXAMPLE,
+          example: REVIEW_OUTPUT_EXAMPLE,
         },
       },
       schema: {
@@ -310,7 +319,7 @@ export function discoveryOutputSchema() {
     },
     output: {
       type: "json",
-      example: SEARCH_OUTPUT_EXAMPLE,
+      example: REVIEW_OUTPUT_EXAMPLE,
     },
   };
 }
@@ -318,7 +327,7 @@ export function discoveryOutputSchema() {
 export function mcpServerCard(version: string) {
   return {
     serverInfo: {
-      name: "Titan Frameworks",
+      name: "Titan Frameworks (LangChain, LlamaIndex, Ollama, XRPL)",
       version,
       description: SERVER_DESCRIPTION,
     },
@@ -336,7 +345,7 @@ export function mcpServerCard(version: string) {
         mimeType: "application/json",
       },
     ],
-    prompts: [],
+    prompts: [...MCP_PUBLIC_PROMPTS],
   };
 }
 

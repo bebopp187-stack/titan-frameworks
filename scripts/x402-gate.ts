@@ -14,13 +14,22 @@ const toolsCall = {
   params: { name: "search_ai_framework_docs", arguments: { framework: "langchain", query: "LCEL" } },
 };
 
+const listFrameworks = {
+  jsonrpc: "2.0",
+  id: 4,
+  method: "tools/call",
+  params: { name: "list_supported_frameworks", arguments: {} },
+};
+
 const cases: Array<[string, boolean, string, unknown]> = [
   ["GET session is free", false, "GET", undefined],
   ["DELETE session is free", false, "DELETE", undefined],
   ["initialize is free", false, "POST", initialize],
   ["tools/list is free", false, "POST", toolsList],
   ["tools/call is paid", true, "POST", toolsCall],
-  ["batch with tools/call is paid", true, "POST", [initialize, toolsCall]],
+  ["list_supported_frameworks is free", false, "POST", listFrameworks],
+  ["batch with paid tools/call is paid", true, "POST", [initialize, toolsCall]],
+  ["batch with only list_supported_frameworks is free", false, "POST", [initialize, listFrameworks]],
   ["empty POST is not billed", false, "POST", {}],
 ];
 

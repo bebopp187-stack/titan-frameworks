@@ -310,25 +310,38 @@ async function verifyUsdc(proof: string, resource: string, decoded: unknown): Pr
 
 const PAID_MCP_METHODS = new Set(["tools/call"]);
 
-function jsonRpcMethods(body: unknown): string[] {
-  if (Array.isArray(body)) {
-    return body.flatMap((item) => jsonRpcMethods(item));
-  }
-  if (body && typeof body === "object" && "method" in body) {
-    const method = (body as { method?: unknown }).method;
-    if (typeof method === "string" && method.trim()) return [method];
-  }
+/** Aisle-sign tools. Shopping agents can call these without x402. */
+export const FREE_TOOLS_CALL = new Set(["list_supported_frameworks"]);
+
+function jsonRpcRequests(body: unknown): Record<string, unknown>[] {
+  if (Array.isArray(body)) return body.flatMap((item) => jsonRpcRequests(item));
+  if (body && typeof body === "object") return [body as Record<string, unknown>];
   return [];
 }
 
+function toolsCallName(req: Record<string, unknown>): string | undefined {
+  if (req.method !== "tools/call") return undefined;
+  const params = req.params;
+  if (!params || typeof params !== "object" || !("name" in params)) return undefined;
+  const name = (params as { name?: unknown }).name;
+  return typeof name === "string" ? name : undefined;
+}
+
 /**
- * Charge `tools/call` only. Directories (Glama, Smithery) health-check with
- * unpaid `initialize` + `tools/list` and treat HTTP 402 as a dead connector.
+ * Charge `tools/call` only, except aisle-sign tools in FREE_TOOLS_CALL.
+ * Directories (Glama, Smithery) health-check with unpaid `initialize` + `tools/list`
+ * and treat HTTP 402 as a dead connector.
  * GET/DELETE are Streamable HTTP session channels, not tool execution.
  */
 export function mcpHttpRequiresPayment(httpMethod: string, body: unknown): boolean {
   if (httpMethod.toUpperCase() !== "POST") return false;
-  return jsonRpcMethods(body).some((method) => PAID_MCP_METHODS.has(method));
+  return jsonRpcRequests(body).some((req) => {
+    const method = req.method;
+    if (typeof method !== "string" || !PAID_MCP_METHODS.has(method)) return false;
+    const tool = toolsCallName(req);
+    if (tool && FREE_TOOLS_CALL.has(tool)) return false;
+    return true;
+  });
 }
 
 /**

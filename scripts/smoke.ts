@@ -95,6 +95,7 @@ if (lcDeps.count < 1 || lcDeps.deprecations.some((d) => d.framework !== "langcha
   failures.push("list-deprecations-filter");
 }
 if (MCP_PUBLIC_TOOLS.length !== 10) failures.push("public-tools-count");
+if (MCP_PUBLIC_TOOLS[0]?.name !== "review_framework_code") failures.push("public-tools-order");
 
 if (failures.length > 0) {
   console.error("smoke failed:", failures.join(", "));
