@@ -27,7 +27,9 @@ Agent discovery: [`llms.txt`](https://titan-frameworks-production.up.railway.app
 }
 ```
 
-x402-capable clients send `PAYMENT-SIGNATURE` / `X-PAYMENT` after a 402. Local stdio (Cursor folder / `npm run dev`) does not charge.
+x402-capable clients send `PAYMENT-SIGNATURE` / `X-PAYMENT` after a 402. Local stdio (`titan-frameworks` / `npm run dev`) does not charge.
+
+To pay production from Cursor, enable **titan-frameworks-paid** in MCP settings (runs `scripts/cursor-x402-proxy.ts`, signs Base USDC from `EVM_PRIVATE_KEY` in `.env`, cap `X402_PROXY_MAX_CALLS` default 25). Check the proxy with `npx tsx scripts/cursor-x402-proxy.ts --check`.
 
 ## HTTP endpoints
 
@@ -54,6 +56,8 @@ Project config is in `.cursor/mcp.json`. Seed docs ship in `src/data/seed-fallba
 ```bash
 npm run index-docs
 ```
+
+Production re-indexes automatically when the live index is older than 24 hours. `/admin` can still trigger a crawl immediately.
 
 ## HTTP mode (Vercel / Railway)
 

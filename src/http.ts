@@ -10,6 +10,7 @@ import { MCP_PUBLIC_TOOLS, mcpServerCard, openApiDocument, x402WellKnownIndex } 
 import { projectRoot } from "./services/frameworks.js";
 import { loadDocsIndex } from "./services/docs-store.js";
 import { recordMcpCall } from "./services/earnings.js";
+import { startIndexScheduler } from "./services/index-schedule.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -133,6 +134,7 @@ async function start(): Promise<void> {
   app.listen(port, "0.0.0.0", () => {
     console.error(`Titan Frameworks HTTP MCP on http://0.0.0.0:${port}/mcp`);
     console.error(`Admin dashboard on http://0.0.0.0:${port}/admin`);
+    startIndexScheduler();
   });
 }
 

@@ -113,7 +113,7 @@ Match a stack trace against known deprecated APIs. Use only when you have an `er
 - Ollama (`ollama`) — CLI, REST `/api/chat`, Python/JS SDK
 - XRPL (`xrpl`) — xrpl.js / xrpl-py Client, Wallet, Payments, channels, trustlines, RLUSD, Hooks notes
 
-Refresh: `npm run index-docs`
+Refresh: nightly in production when the index is older than 24 hours. Local: `npm run index-docs`.
 
 ## Agent notes
 

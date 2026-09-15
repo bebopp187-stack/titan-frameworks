@@ -14,3 +14,4 @@ src/data/docs-index.sqlite
 src/data/*.sqlite-*
 src/data/earnings.json
 src/data/query-log.json
+src/data/index-schedule.json

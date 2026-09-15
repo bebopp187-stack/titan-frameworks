@@ -19,6 +19,15 @@ type IndexJob = {
   error?: string;
 };
 
+type IndexSchedule = {
+  enabled: boolean;
+  maxAgeHours: number;
+  indexUpdatedAt: string;
+  stale: boolean;
+  lastAttemptAt: string | null;
+  lastError: string | null;
+};
+
 type Stats = {
   chunks: number;
   mcpCalls: number;
@@ -29,6 +38,8 @@ type Stats = {
   queryLog: QueryRow[];
   frameworks: Record<FrameworkId, boolean>;
   indexJob: IndexJob;
+  indexSchedule?: IndexSchedule;
+  indexUpdatedAt?: string;
 };
 
 const LABELS: Record<FrameworkId, string> = {
@@ -216,7 +227,11 @@ export default function AdminDashboard() {
         <article className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
           <p className="text-xs uppercase tracking-wide text-slate-400">Indexed chunks</p>
           <p className="mt-3 text-3xl font-bold">{stats?.chunks ?? 0}</p>
-          <p className="mt-2 text-xs text-slate-500">Live docs index on this instance</p>
+          <p className="mt-2 text-xs text-slate-500">
+            {stats?.indexUpdatedAt
+              ? `Crawled ${new Date(stats.indexUpdatedAt).toLocaleString()}`
+              : "Live docs index on this instance"}
+          </p>
         </article>
       </section>
 
@@ -225,6 +240,15 @@ export default function AdminDashboard() {
           <div>
             <h2 className="text-lg font-medium">Docs indexer</h2>
             <p className="text-sm text-slate-400">{job?.message || "Idle"}</p>
+            {stats?.indexSchedule ? (
+              <p className="mt-1 text-xs text-slate-500">
+                {stats.indexSchedule.enabled
+                  ? `Auto-refresh when the index is older than ${stats.indexSchedule.maxAgeHours}h${
+                      stats.indexSchedule.stale ? " — currently stale" : ""
+                    }.`
+                  : "Auto-refresh is off on this instance."}
+              </p>
+            ) : null}
           </div>
           <button
             type="button"

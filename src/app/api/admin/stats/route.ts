@@ -5,6 +5,7 @@ import { getEarnings, usdcEarned, xrpEarned } from "@/services/earnings";
 import { getQueryLog } from "@/services/query-log";
 import { getFrameworkToggles } from "@/services/framework-config";
 import { getIndexJob } from "@/services/index-job";
+import { getIndexScheduleStatus } from "@/services/index-schedule";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,8 @@ export async function GET(req: Request) {
     queryLog: log.entries,
     frameworks: getFrameworkToggles(),
     indexJob: getIndexJob(),
+    indexSchedule: getIndexScheduleStatus(),
+    indexUpdatedAt: index.updatedAt,
     updatedAt: earnings.updatedAt,
   });
 }
