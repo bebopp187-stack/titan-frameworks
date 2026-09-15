@@ -153,16 +153,34 @@ function decodeProof(proof: string): unknown {
 }
 
 function assetFromProof(decoded: unknown): "XRP" | "RLUSD" | "USDC" {
-  const rec = decoded as { accepted?: { asset?: string }; asset?: string };
-  const asset = (rec?.accepted?.asset ?? rec?.asset ?? "XRP").toUpperCase();
+  const rec = decoded as {
+    accepted?: { asset?: string; network?: string };
+    asset?: string;
+    network?: string;
+    payload?: { signedTxBlob?: string };
+  };
+  const asset = String(rec?.accepted?.asset ?? rec?.asset ?? "").toUpperCase();
+  const network = String(rec?.accepted?.network ?? rec?.network ?? "").toLowerCase();
+  if (asset.includes("USDC") || asset.startsWith("0X833") || network.startsWith("eip155")) {
+    return "USDC";
+  }
   if (asset.includes("RLUSD") || asset.startsWith("524C555344")) return "RLUSD";
-  if (asset.includes("USDC") || asset.startsWith("0X833")) return "USDC";
-  return "XRP";
+  if (asset === "XRP" || network.startsWith("xrpl") || rec?.payload?.signedTxBlob) return "XRP";
+  if (network.startsWith("eip155")) return "USDC";
+  return "USDC";
 }
 
-async function verifyWithFacilitator(proof: string, resource: string): Promise<boolean> {
+function isXrplAsset(asset: "XRP" | "RLUSD" | "USDC"): asset is "XRP" | "RLUSD" {
+  return asset === "XRP" || asset === "RLUSD";
+}
+
+async function verifyWithFacilitator(
+  proof: string,
+  resource: string,
+  asset: "XRP" | "RLUSD",
+): Promise<boolean> {
   const url = xrplFacilitatorUrl().replace(/\/$/, "");
-  const requirements = xrplAccepts(resource)[0];
+  const requirements = asset === "RLUSD" ? xrplAccepts(resource)[1] : xrplAccepts(resource)[0];
   const payload = decodeProof(proof);
   try {
     const res = await fetch(`${url}/verify`, {
@@ -219,9 +237,11 @@ export async function x402MockMiddleware(
     return;
   }
 
+  const decoded = decodeProof(proof);
+  const asset = assetFromProof(decoded);
   const live = process.env.X402_XRPL_LIVE === "true";
-  if (live) {
-    const ok = await verifyWithFacilitator(proof, resource);
+  if (live && isXrplAsset(asset)) {
+    const ok = await verifyWithFacilitator(proof, resource, asset);
     if (!ok) {
       const body = paymentRequiredBody(resource);
       res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
@@ -230,8 +250,6 @@ export async function x402MockMiddleware(
     }
   }
 
-  const decoded = decodeProof(proof);
-  const asset = assetFromProof(decoded);
   const amount =
     asset === "XRP"
       ? xrplPriceDrops()
@@ -244,7 +262,7 @@ export async function x402MockMiddleware(
     "utf8",
   ).toString("base64");
   res.setHeader("PAYMENT-RESPONSE", response);
-  res.setHeader("X-PAYMENT-RESPONSE", live ? "xrpl:settled" : "mock:settled");
+  res.setHeader("X-PAYMENT-RESPONSE", live && isXrplAsset(asset) ? "xrpl:settled" : "mock:settled");
   next();
 }
 

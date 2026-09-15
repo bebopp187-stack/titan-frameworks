@@ -78,7 +78,9 @@ set X402_PAY_TO=0x584c004037bc369b3b49bd18381a5a6d0c1c1215
 npm run dev:http
 ```
 
-Requests to `/mcp` without `X-PAYMENT` / `PAYMENT-SIGNATURE` / `X-Payment-Signature` return **402** and an `accepts[]` body covering Base USDC **and** XRPL (`XRP` drops + `RLUSD`). Set `XRPL_PAY_TO_ADDRESS`, `XRPL_PRICE_DROPS=1000`, `XRPL_NETWORK=xrpl:1`, and `XRPL_FACILITATOR_URL`. Admin UI: `GET /admin` (includes **Total XRP Earned**).
+Requests to `/mcp` without `X-PAYMENT` / `PAYMENT-SIGNATURE` / `X-Payment-Signature` return **402** and an `accepts[]` body covering Base USDC **and** XRPL (`XRP` drops + `RLUSD`). Set `XRPL_PAY_TO_ADDRESS`, `XRPL_PRICE_DROPS=1000`, `XRPL_NETWORK=xrpl:1`, and `XRPL_FACILITATOR_URL`.
+
+Set `X402_XRPL_LIVE=true` so XRP/RLUSD proofs are verified (and settled) through the T54 facilitator before `/mcp` is served. USDC proofs stay on the Base path and are never sent to the XRPL facilitator. Admin UI: `GET /admin` (includes **Total XRP Earned**).
 
 ## Layout
 

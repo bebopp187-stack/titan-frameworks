@@ -55,6 +55,7 @@ app.get("/tools", (_req, res) => {
       networks: ["eip155:8453", xrplNetwork()],
       xrpDrops: xrplPriceDrops(),
       enabled: process.env.X402_ENABLED === "true",
+      xrplLive: process.env.X402_XRPL_LIVE === "true",
     },
   });
 });
