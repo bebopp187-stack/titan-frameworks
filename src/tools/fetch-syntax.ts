@@ -1,3 +1,4 @@
+import { FETCH_SYNTAX_DESCRIPTION } from "../mcp/tool-copy.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SyntaxInputSchema, SyntaxOutputSchema } from "../types/index.js";
 import { normalizeFramework } from "../services/frameworks.js";
@@ -10,8 +11,7 @@ export function registerFetchSyntaxTool(server: McpServer): void {
     "fetch_latest_syntax",
     {
       title: "Fetch Latest Syntax",
-      description:
-        "Return working imports, code snippets, and migration notes for a framework topic (agents, rag, wallet, payment, trustlines, ...).",
+      description: FETCH_SYNTAX_DESCRIPTION,
       inputSchema: SyntaxInputSchema,
       outputSchema: SyntaxOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },

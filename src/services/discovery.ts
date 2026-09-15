@@ -1,5 +1,11 @@
 /** Public MCP tool + x402 bazaar metadata for Smithery, PayAI, x402scan, and the MCP registry. */
 
+import {
+  DIAGNOSE_ERROR_DESCRIPTION,
+  FETCH_SYNTAX_DESCRIPTION,
+  SEARCH_DOCS_DESCRIPTION,
+} from "../mcp/tool-copy.js";
+
 export const PRODUCTION_ORIGIN = "https://titan-frameworks-production.up.railway.app";
 export const PRODUCTION_MCP_URL = `${PRODUCTION_ORIGIN}/mcp`;
 
@@ -9,8 +15,15 @@ const SEARCH_SCHEMA = {
   type: "object",
   required: ["framework", "query"],
   properties: {
-    framework: { type: "string", enum: [...FRAMEWORKS] },
-    query: { type: "string", description: "Keyword or natural-language search query" },
+    framework: {
+      type: "string",
+      enum: [...FRAMEWORKS],
+      description: "One of langchain, llamaindex, ollama, or xrpl — the library the user is coding against",
+    },
+    query: {
+      type: "string",
+      description: "2–8 keywords or an API symbol. Not a stack trace (use diagnose_framework_error)",
+    },
   },
 } as const;
 
@@ -18,10 +31,15 @@ const SYNTAX_SCHEMA = {
   type: "object",
   required: ["framework", "topic"],
   properties: {
-    framework: { type: "string", enum: [...FRAMEWORKS] },
+    framework: {
+      type: "string",
+      enum: [...FRAMEWORKS],
+      description: "One of langchain, llamaindex, ollama, or xrpl — the library the user is coding against",
+    },
     topic: {
       type: "string",
-      description: "agents | rag | chat | tools | streaming | wallet | payment | migration",
+      description:
+        "One topic word: agents, rag, chat, tools, streaming, wallet, payment, trustlines, channels, rlusd, hooks, or migration",
     },
   },
 } as const;
@@ -30,26 +48,32 @@ const DIAGNOSE_SCHEMA = {
   type: "object",
   required: ["framework", "error_log"],
   properties: {
-    framework: { type: "string", enum: [...FRAMEWORKS] },
-    error_log: { type: "string", description: "Stack trace or error message to match" },
+    framework: {
+      type: "string",
+      enum: [...FRAMEWORKS],
+      description: "One of langchain, llamaindex, ollama, or xrpl — the library that threw the error",
+    },
+    error_log: {
+      type: "string",
+      description: "Raw traceback or exception text. Paste the error, not a question about it",
+    },
   },
 } as const;
 
 export const MCP_PUBLIC_TOOLS = [
   {
     name: "search_ai_framework_docs",
-    description:
-      "Keyword search over locally indexed Markdown for langchain, llamaindex, ollama, or xrpl.",
+    description: SEARCH_DOCS_DESCRIPTION,
     inputSchema: SEARCH_SCHEMA,
   },
   {
     name: "fetch_latest_syntax",
-    description: "Working imports, snippets, and migration notes for a framework topic.",
+    description: FETCH_SYNTAX_DESCRIPTION,
     inputSchema: SYNTAX_SCHEMA,
   },
   {
     name: "diagnose_framework_error",
-    description: "Match a stack trace against known deprecated APIs and return an exact fix.",
+    description: DIAGNOSE_ERROR_DESCRIPTION,
     inputSchema: DIAGNOSE_SCHEMA,
   },
 ] as const;

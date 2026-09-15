@@ -1,3 +1,4 @@
+import { SEARCH_DOCS_DESCRIPTION } from "../mcp/tool-copy.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SearchInputSchema, SearchOutputSchema } from "../types/index.js";
 import { normalizeFramework } from "../services/frameworks.js";
@@ -10,8 +11,7 @@ export function registerSearchDocsTool(server: McpServer): void {
     "search_ai_framework_docs",
     {
       title: "Search AI Framework Docs",
-      description:
-        "Keyword search over locally indexed Markdown for langchain, llamaindex, ollama, or xrpl. Returns compact chunks.",
+      description: SEARCH_DOCS_DESCRIPTION,
       inputSchema: SearchInputSchema,
       outputSchema: SearchOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },

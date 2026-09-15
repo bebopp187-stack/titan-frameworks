@@ -37,8 +37,11 @@ export interface DocsIndex {
 export const SearchInputSchema = z.object({
   framework: z
     .string()
-    .describe("Target library: langchain | llamaindex | ollama | xrpl"),
-  query: z.string().min(1).describe("Keyword or natural-language search query"),
+    .describe("One of langchain, llamaindex, ollama, or xrpl — the library the user is coding against"),
+  query: z
+    .string()
+    .min(1)
+    .describe("2–8 keywords or an API symbol. Not a stack trace (use diagnose_framework_error)"),
 });
 
 export const SearchHitSchema = z.object({
@@ -60,12 +63,12 @@ export const SearchOutputSchema = z.object({
 export const SyntaxInputSchema = z.object({
   framework: z
     .string()
-    .describe("Target library: langchain | llamaindex | ollama | xrpl"),
+    .describe("One of langchain, llamaindex, ollama, or xrpl — the library the user is coding against"),
   topic: z
     .string()
     .min(1)
     .describe(
-      "Topic such as agents, rag, chat, tools, payment, wallet, trustlines, channels, rlusd, hooks, migration",
+      "One topic word: agents, rag, chat, tools, streaming, wallet, payment, trustlines, channels, rlusd, hooks, or migration",
     ),
 });
 
@@ -93,8 +96,11 @@ export const SyntaxOutputSchema = z.object({
 export const DiagnoseInputSchema = z.object({
   framework: z
     .string()
-    .describe("Target library: langchain | llamaindex | ollama | xrpl"),
-  error_log: z.string().min(1).describe("Stack trace or error message to match"),
+    .describe("One of langchain, llamaindex, ollama, or xrpl — the library that threw the error"),
+  error_log: z
+    .string()
+    .min(1)
+    .describe("Raw traceback or exception text. Paste the error, not a question about it"),
 });
 
 export const DiagnoseOutputSchema = z.object({

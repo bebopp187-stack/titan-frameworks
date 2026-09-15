@@ -11,9 +11,9 @@ Agent discovery: [`llms.txt`](https://titan-frameworks-production.up.railway.app
 
 | Tool | Purpose |
 | --- | --- |
-| `search_ai_framework_docs` | Keyword search over local Markdown chunks |
-| `fetch_latest_syntax` | Working snippets, imports, migration notes |
-| `diagnose_framework_error` | Stack-trace → deprecated API → exact fix |
+| `search_ai_framework_docs` | Keyword search over local Markdown. Use for concepts/symbols; not stack traces |
+| `fetch_latest_syntax` | Working snippets and migration notes for one topic. Use when writing code |
+| `diagnose_framework_error` | Stack-trace → deprecated API → exact fix. Use only when you have an error |
 
 ## Connect a client
 

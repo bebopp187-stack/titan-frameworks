@@ -35,7 +35,7 @@ Local stdio mode (`npx tsx src/index.ts`) does not charge.
 
 ### search_ai_framework_docs
 
-Search locally indexed Markdown for a framework. Returns compact chunks.
+Keyword search over a local Markdown index. Use for concepts or symbols; `hitCount` 0 means no match. Not for stack traces (`diagnose_framework_error`) or copy-paste syntax (`fetch_latest_syntax`). Paid `tools/call`.
 
 ```json
 {
@@ -72,7 +72,7 @@ Search locally indexed Markdown for a framework. Returns compact chunks.
 
 ### fetch_latest_syntax
 
-Working snippets, imports, and migration notes for the latest documented version.
+Curated snippets and migration notes for one topic. Use when writing or migrating code. Unknown topics fall back to related doc chunks. Paid `tools/call`.
 
 ```json
 {
@@ -90,7 +90,7 @@ Working snippets, imports, and migration notes for the latest documented version
 
 ### diagnose_framework_error
 
-Match a stack trace against known deprecated APIs and return an exact fix.
+Match a stack trace against known deprecated APIs. Use only when you have an `error_log`; `matched=false` means search next. Paid `tools/call`.
 
 ```json
 {

@@ -1,3 +1,4 @@
+import { DIAGNOSE_ERROR_DESCRIPTION } from "../mcp/tool-copy.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { DiagnoseInputSchema, DiagnoseOutputSchema } from "../types/index.js";
 import { normalizeFramework } from "../services/frameworks.js";
@@ -10,8 +11,7 @@ export function registerDiagnoseErrorTool(server: McpServer): void {
     "diagnose_framework_error",
     {
       title: "Diagnose Framework Error",
-      description:
-        "Match a stack trace against known deprecated APIs for langchain, llamaindex, ollama, or xrpl and return an exact fix.",
+      description: DIAGNOSE_ERROR_DESCRIPTION,
       inputSchema: DiagnoseInputSchema,
       outputSchema: DiagnoseOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
