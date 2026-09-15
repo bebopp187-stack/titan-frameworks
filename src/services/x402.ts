@@ -37,8 +37,13 @@ export function xrplSourceTag(): number {
   return Number.isFinite(n) ? n : Number(DEFAULT_XRPL_SOURCE_TAG);
 }
 
+export const XRPL_FACILITATOR_MAINNET = "https://xrpl-facilitator-mainnet.t54.ai";
+export const XRPL_FACILITATOR_TESTNET = "https://xrpl-facilitator-testnet.t54.ai";
+
 export function xrplFacilitatorUrl(): string {
-  return process.env.XRPL_FACILITATOR_URL ?? "https://xrpl-facilitator-testnet.t54.ai";
+  const override = process.env.XRPL_FACILITATOR_URL?.trim();
+  if (override) return override;
+  return xrplNetwork() === "xrpl:0" ? XRPL_FACILITATOR_MAINNET : XRPL_FACILITATOR_TESTNET;
 }
 
 export function xrplRlusdIssuer(): string {
@@ -102,30 +107,32 @@ export function xrplAccepts(resource: string) {
   return [xrp, rlusd];
 }
 
+function xrplLive(): boolean {
+  return process.env.X402_XRPL_LIVE === "true";
+}
+
 export function paymentRequiredBody(resource: string) {
   const payTo = process.env.X402_PAY_TO ?? "0x584c004037bc369b3b49bd18381a5a6d0c1c1215";
+  const usdc = {
+    scheme: "exact",
+    network: X402_NETWORK,
+    maxAmountRequired: X402_ATOMIC,
+    resource,
+    description: "Titan Frameworks MCP tool call",
+    mimeType: "application/json",
+    payTo,
+    maxTimeoutSeconds: 60,
+    asset: USDC_BASE,
+    extra: {
+      name: "USD Coin",
+      version: "2",
+      priceUsd: X402_PRICE_USDC,
+    },
+  };
   return {
     x402Version: 1,
     error: "PAYMENT_REQUIRED",
-    accepts: [
-      {
-        scheme: "exact",
-        network: X402_NETWORK,
-        maxAmountRequired: X402_ATOMIC,
-        resource,
-        description: "Titan Frameworks MCP tool call",
-        mimeType: "application/json",
-        payTo,
-        maxTimeoutSeconds: 60,
-        asset: USDC_BASE,
-        extra: {
-          name: "USD Coin",
-          version: "2",
-          priceUsd: X402_PRICE_USDC,
-        },
-      },
-      ...xrplAccepts(resource),
-    ],
+    accepts: xrplLive() ? [...xrplAccepts(resource)] : [usdc, ...xrplAccepts(resource)],
   };
 }
 
@@ -239,7 +246,13 @@ export async function x402MockMiddleware(
 
   const decoded = decodeProof(proof);
   const asset = assetFromProof(decoded);
-  const live = process.env.X402_XRPL_LIVE === "true";
+  const live = xrplLive();
+  if (live && !isXrplAsset(asset)) {
+    const body = paymentRequiredBody(resource);
+    res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
+    res.status(402).json({ ...body, error: "PAYMENT_INVALID" });
+    return;
+  }
   if (live && isXrplAsset(asset)) {
     const ok = await verifyWithFacilitator(proof, resource, asset);
     if (!ok) {
@@ -278,7 +291,7 @@ export function attachX402(_app: Express): void {
    *     path: "/mcp",
    *     price: process.env.XRPL_PRICE_DROPS || "1000",
    *     payToAddress: process.env.XRPL_PAY_TO_ADDRESS!,
-   *     network: process.env.XRPL_NETWORK ?? "xrpl:1",
+     *     network: process.env.XRPL_NETWORK ?? "xrpl:0",
    *     facilitatorUrl: process.env.XRPL_FACILITATOR_URL,
    *     asset: "XRP",
    *     extra: { sourceTag: Number(process.env.XRPL_SOURCE_TAG ?? "804681468") },

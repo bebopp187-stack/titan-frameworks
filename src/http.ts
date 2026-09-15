@@ -51,8 +51,12 @@ app.get("/tools", (_req, res) => {
     ],
     frameworks: ["langchain", "llamaindex", "ollama", "xrpl"],
     pricing: {
-      httpMcp: "$0.001 USDC or 1000 drops XRP / RLUSD",
-      networks: ["eip155:8453", xrplNetwork()],
+      httpMcp:
+        process.env.X402_XRPL_LIVE === "true"
+          ? "1000 drops XRP / 0.001 RLUSD"
+          : "$0.001 USDC or 1000 drops XRP / RLUSD",
+      networks:
+        process.env.X402_XRPL_LIVE === "true" ? [xrplNetwork()] : ["eip155:8453", xrplNetwork()],
       xrpDrops: xrplPriceDrops(),
       enabled: process.env.X402_ENABLED === "true",
       xrplLive: process.env.X402_XRPL_LIVE === "true",
