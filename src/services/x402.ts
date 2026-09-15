@@ -245,9 +245,16 @@ async function postFacilitator(
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(12_000),
     });
-    if (!res.ok) return false;
-    const verified = (await res.json()) as { isValid?: boolean; valid?: boolean };
-    if (verified.isValid === false || verified.valid === false) return false;
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error(`x402 verify ${res.status} ${facilitatorUrl}`, detail.slice(0, 300));
+      return false;
+    }
+    const verified = (await res.json()) as { isValid?: boolean; valid?: boolean; invalidReason?: string };
+    if (verified.isValid === false || verified.valid === false) {
+      console.error("x402 verify rejected", verified.invalidReason ?? verified);
+      return false;
+    }
 
     await fetch(`${url}/settle`, {
       method: "POST",
@@ -261,17 +268,28 @@ async function postFacilitator(
   }
 }
 
+function requirementsFromProof(
+  decoded: unknown,
+  resource: string,
+  asset: "XRP" | "RLUSD" | "USDC",
+): unknown {
+  const rec = decoded as { accepted?: unknown };
+  if (rec?.accepted && typeof rec.accepted === "object") return rec.accepted;
+  if (asset === "USDC") return usdcAccept(resource);
+  return asset === "RLUSD" ? xrplAccepts(resource)[1] : xrplAccepts(resource)[0];
+}
+
 async function verifyXrpl(
   proof: string,
   resource: string,
   asset: "XRP" | "RLUSD",
+  decoded: unknown,
 ): Promise<boolean> {
-  const requirements = asset === "RLUSD" ? xrplAccepts(resource)[1] : xrplAccepts(resource)[0];
-  return postFacilitator(xrplFacilitatorUrl(), proof, requirements);
+  return postFacilitator(xrplFacilitatorUrl(), proof, requirementsFromProof(decoded, resource, asset));
 }
 
-async function verifyUsdc(proof: string, resource: string): Promise<boolean> {
-  return postFacilitator(usdcFacilitatorUrl(), proof, usdcAccept(resource));
+async function verifyUsdc(proof: string, resource: string, decoded: unknown): Promise<boolean> {
+  return postFacilitator(usdcFacilitatorUrl(), proof, requirementsFromProof(decoded, resource, "USDC"));
 }
 
 /**
@@ -303,7 +321,7 @@ export async function x402MockMiddleware(
 
   if (isXrplAsset(asset)) {
     if (xrplOn) {
-      const ok = await verifyXrpl(proof, resource, asset);
+      const ok = await verifyXrpl(proof, resource, asset, decoded);
       if (!ok) {
         const body = paymentRequiredBody(resource);
         res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
@@ -312,7 +330,7 @@ export async function x402MockMiddleware(
       }
     }
   } else if (usdcOn) {
-    const ok = await verifyUsdc(proof, resource);
+    const ok = await verifyUsdc(proof, resource, decoded);
     if (!ok) {
       const body = paymentRequiredBody(resource);
       res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
