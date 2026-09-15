@@ -7,5 +7,7 @@ export {
   xrplPayTo,
   xrplPriceDrops,
   xrplFacilitatorUrl,
-  RLUSD_HEX,
+  usdcAccept,
+  usdcFacilitatorUrl,
+  USDC_BASE,
 } from "../services/x402.js";

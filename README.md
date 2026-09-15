@@ -78,9 +78,9 @@ set X402_PAY_TO=0x584c004037bc369b3b49bd18381a5a6d0c1c1215
 npm run dev:http
 ```
 
-Requests to `/mcp` without `X-PAYMENT` / `PAYMENT-SIGNATURE` / `X-Payment-Signature` return **402** and an `accepts[]` body covering Base USDC **and** XRPL (`XRP` drops + `RLUSD`). Production uses **XRPL mainnet**: `XRPL_NETWORK=xrpl:0` and `XRPL_FACILITATOR_URL=https://xrpl-facilitator-mainnet.t54.ai`. Pay-to: `XRPL_PAY_TO_ADDRESS`. Price: `XRPL_PRICE_DROPS=1000` (0.001 XRP).
+Requests to `/mcp` without `X-PAYMENT` / `PAYMENT-SIGNATURE` / `X-Payment-Signature` return **402** and an `accepts[]` body covering Base USDC **and** XRPL (`XRP` drops + `RLUSD`). Production uses **Base mainnet** USDC (`eip155:8453`, PayAI facilitator) and **XRPL mainnet** (`xrpl:0`, T54 facilitator).
 
-Set `X402_XRPL_LIVE=true` so XRP/RLUSD proofs are verified (and settled) through the T54 facilitator before `/mcp` is served. While live, `/mcp` only accepts XRPL rails — unverified USDC headers are rejected. Admin UI: `GET /admin` (includes **Total XRP Earned**).
+Set `X402_USDC_LIVE=true` so USDC proofs are verified and settled through PayAI (`https://facilitator.payai.network`) before `/mcp` is served. Set `X402_XRPL_LIVE=true` for XRP/RLUSD via T54. A raw USDC transfer is not an x402 proof — clients must retry `/mcp` with `PAYMENT-SIGNATURE`. Admin UI: `GET /admin` (includes **Total XRP Earned** and **Total USDC Earned**).
 
 ## Layout
 

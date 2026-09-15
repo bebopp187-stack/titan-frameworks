@@ -70,6 +70,7 @@
           { label: "MCP calls", value: s.mcpCalls, hint: "HTTP /mcp invocations" },
           { label: "Settlements", value: s.settlements, hint: "x402 receipts (USDC + XRPL)" },
           { label: "Total XRP Earned", value: s.totalXrpEarned, hint: s.xrpDropsEarned + " drops", xrp: true },
+          { label: "Total USDC Earned", value: s.totalUsdcEarned ?? "0.000000", hint: (s.usdcAtomicEarned || 0) + " atomic", xrp: true },
         ];
         document.getElementById("cards").innerHTML = cards
           .map(

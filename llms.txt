@@ -2,7 +2,7 @@
 
 > Live, token-efficient documentation tools for fast-evolving AI frameworks.
 
-Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`) after a 1000-drop XRP / RLUSD x402 payment on XRPL mainnet when billing is enabled.
+Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`) after a $0.001 USDC payment on Base **or** 1000 drops XRP / RLUSD on XRPL mainnet when billing is enabled.
 
 ## Endpoints
 
@@ -11,19 +11,20 @@ Titan Frameworks is a Model Context Protocol server. Agents call tools over stdi
 | GET | `/health` | free | none |
 | GET | `/llms.txt` | free | none |
 | GET | `/tools` | free | none |
-| POST/GET/DELETE | `/mcp` | 1000 drops XRP / RLUSD on XRPL mainnet (`xrpl:0`) when `X402_ENABLED=true` | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
+| POST/GET/DELETE | `/mcp` | $0.001 USDC on Base (`eip155:8453`) **or** 1000 drops XRP / RLUSD on XRPL mainnet (`xrpl:0`) when `X402_ENABLED=true` | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
 | GET | `/admin` | free | none |
 
 Local stdio mode (`npx tsx src/index.ts`) does not charge.
 
 ## Pricing
 
-- **Tool calls over HTTP `/mcp`:** `1000` drops XRP (`0.001` XRP) / RLUSD on XRPL mainnet
-- **Networks:** XRPL mainnet (`xrpl:0`)
-- **Assets:** native `XRP`, RLUSD (`524C555344…` + issuer)
+- **Tool calls over HTTP `/mcp`:** `0.001` USDC on Base **or** `1000` drops XRP (`0.001` XRP) / RLUSD on XRPL mainnet
+- **Networks:** Base mainnet (`eip155:8453`) and XRPL mainnet (`xrpl:0`)
+- **Assets:** USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, native `XRP`, RLUSD (`524C555344…` + issuer)
 - **Scheme:** `exact` (x402)
-- **Mock billing:** set `X402_ENABLED=true` without `X402_XRPL_LIVE`. Missing payment headers return HTTP 402 with machine-readable `accepts[]` (Base + XRPL channels).
-- **Live XRPL verify:** `X402_XRPL_LIVE=true` plus `XRPL_FACILITATOR_URL` (production: `https://xrpl-facilitator-mainnet.t54.ai`, `XRPL_NETWORK=xrpl:0`). While live, only XRP/RLUSD proofs are accepted.
+- **Mock billing:** set `X402_ENABLED=true` without live flags. Missing payment headers return HTTP 402 with machine-readable `accepts[]` (Base + XRPL channels).
+- **Live Base USDC:** `X402_USDC_LIVE=true` plus `X402_USDC_FACILITATOR_URL` (production: `https://facilitator.payai.network`).
+- **Live XRPL verify:** `X402_XRPL_LIVE=true` plus `XRPL_FACILITATOR_URL` (production: `https://xrpl-facilitator-mainnet.t54.ai`, `XRPL_NETWORK=xrpl:0`).
 
 ## Tools (JSON Schema)
 

@@ -6,6 +6,7 @@ export const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 export const X402_PRICE_USDC = "0.001";
 export const X402_ATOMIC = "1000";
 export const X402_NETWORK = "eip155:8453";
+export const USDC_FACILITATOR_DEFAULT = "https://facilitator.payai.network";
 
 /** RLUSD 40-hex currency code on XRPL. */
 export const RLUSD_HEX = "524C555344000000000000000000000000000000";
@@ -48,6 +49,45 @@ export function xrplFacilitatorUrl(): string {
 
 export function xrplRlusdIssuer(): string {
   return process.env.XRPL_RLUSD_ISSUER ?? RLUSD_ISSUER_MAINNET;
+}
+
+export function usdcPayTo(): string {
+  return process.env.X402_PAY_TO ?? "0x584c004037bc369b3b49bd18381a5a6d0c1c1215";
+}
+
+export function usdcFacilitatorUrl(): string {
+  return process.env.X402_USDC_FACILITATOR_URL?.trim() || USDC_FACILITATOR_DEFAULT;
+}
+
+function xrplLive(): boolean {
+  return process.env.X402_XRPL_LIVE === "true";
+}
+
+function usdcLive(): boolean {
+  return process.env.X402_USDC_LIVE === "true";
+}
+
+export function usdcAccept(resource: string) {
+  const payTo = usdcPayTo();
+  const facilitatorUrl = usdcFacilitatorUrl();
+  return {
+    scheme: "exact" as const,
+    network: X402_NETWORK,
+    maxAmountRequired: X402_ATOMIC,
+    amount: X402_ATOMIC,
+    resource,
+    description: "Titan Frameworks MCP tool call (USDC)",
+    mimeType: "application/json",
+    payTo,
+    maxTimeoutSeconds: 60,
+    asset: USDC_BASE,
+    extra: {
+      name: "USD Coin",
+      version: "2",
+      priceUsd: X402_PRICE_USDC,
+      facilitatorUrl,
+    },
+  };
 }
 
 export function xrplAccepts(resource: string) {
@@ -107,32 +147,11 @@ export function xrplAccepts(resource: string) {
   return [xrp, rlusd];
 }
 
-function xrplLive(): boolean {
-  return process.env.X402_XRPL_LIVE === "true";
-}
-
 export function paymentRequiredBody(resource: string) {
-  const payTo = process.env.X402_PAY_TO ?? "0x584c004037bc369b3b49bd18381a5a6d0c1c1215";
-  const usdc = {
-    scheme: "exact",
-    network: X402_NETWORK,
-    maxAmountRequired: X402_ATOMIC,
-    resource,
-    description: "Titan Frameworks MCP tool call",
-    mimeType: "application/json",
-    payTo,
-    maxTimeoutSeconds: 60,
-    asset: USDC_BASE,
-    extra: {
-      name: "USD Coin",
-      version: "2",
-      priceUsd: X402_PRICE_USDC,
-    },
-  };
   return {
-    x402Version: 1,
+    x402Version: 2,
     error: "PAYMENT_REQUIRED",
-    accepts: xrplLive() ? [...xrplAccepts(resource)] : [usdc, ...xrplAccepts(resource)],
+    accepts: [usdcAccept(resource), ...xrplAccepts(resource)],
   };
 }
 
@@ -181,45 +200,53 @@ function isXrplAsset(asset: "XRP" | "RLUSD" | "USDC"): asset is "XRP" | "RLUSD" 
   return asset === "XRP" || asset === "RLUSD";
 }
 
-async function verifyWithFacilitator(
+async function postFacilitator(
+  facilitatorUrl: string,
   proof: string,
-  resource: string,
-  asset: "XRP" | "RLUSD",
+  requirements: unknown,
 ): Promise<boolean> {
-  const url = xrplFacilitatorUrl().replace(/\/$/, "");
-  const requirements = asset === "RLUSD" ? xrplAccepts(resource)[1] : xrplAccepts(resource)[0];
+  const url = facilitatorUrl.replace(/\/$/, "");
   const payload = decodeProof(proof);
+  const body = {
+    x402Version: 2,
+    paymentHeader: proof,
+    paymentPayload: payload,
+    paymentRequirements: requirements,
+  };
   try {
     const res = await fetch(`${url}/verify`, {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({
-        x402Version: 2,
-        paymentHeader: proof,
-        paymentPayload: payload,
-        paymentRequirements: requirements,
-      }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(12_000),
     });
     if (!res.ok) return false;
-    const body = (await res.json()) as { isValid?: boolean; valid?: boolean };
-    if (body.isValid === false || body.valid === false) return false;
+    const verified = (await res.json()) as { isValid?: boolean; valid?: boolean };
+    if (verified.isValid === false || verified.valid === false) return false;
 
     await fetch(`${url}/settle`, {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({
-        x402Version: 2,
-        paymentHeader: proof,
-        paymentPayload: payload,
-        paymentRequirements: requirements,
-      }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(20_000),
     }).catch(() => undefined);
     return true;
   } catch {
     return false;
   }
+}
+
+async function verifyXrpl(
+  proof: string,
+  resource: string,
+  asset: "XRP" | "RLUSD",
+): Promise<boolean> {
+  const requirements = asset === "RLUSD" ? xrplAccepts(resource)[1] : xrplAccepts(resource)[0];
+  return postFacilitator(xrplFacilitatorUrl(), proof, requirements);
+}
+
+async function verifyUsdc(proof: string, resource: string): Promise<boolean> {
+  return postFacilitator(usdcFacilitatorUrl(), proof, usdcAccept(resource));
 }
 
 /**
@@ -246,21 +273,32 @@ export async function x402MockMiddleware(
 
   const decoded = decodeProof(proof);
   const asset = assetFromProof(decoded);
-  const live = xrplLive();
-  if (live && !isXrplAsset(asset)) {
-    const body = paymentRequiredBody(resource);
-    res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
-    res.status(402).json({ ...body, error: "PAYMENT_INVALID" });
-    return;
-  }
-  if (live && isXrplAsset(asset)) {
-    const ok = await verifyWithFacilitator(proof, resource, asset);
+  const xrplOn = xrplLive();
+  const usdcOn = usdcLive();
+
+  if (isXrplAsset(asset)) {
+    if (xrplOn) {
+      const ok = await verifyXrpl(proof, resource, asset);
+      if (!ok) {
+        const body = paymentRequiredBody(resource);
+        res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
+        res.status(402).json({ ...body, error: "PAYMENT_INVALID" });
+        return;
+      }
+    }
+  } else if (usdcOn) {
+    const ok = await verifyUsdc(proof, resource);
     if (!ok) {
       const body = paymentRequiredBody(resource);
       res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
       res.status(402).json({ ...body, error: "PAYMENT_INVALID" });
       return;
     }
+  } else if (xrplOn) {
+    const body = paymentRequiredBody(resource);
+    res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
+    res.status(402).json({ ...body, error: "PAYMENT_INVALID" });
+    return;
   }
 
   const amount =
@@ -270,31 +308,22 @@ export async function x402MockMiddleware(
         ? process.env.XRPL_PRICE_RLUSD || "0.001"
         : X402_ATOMIC;
   recordSettlement({ asset, network: asset === "USDC" ? X402_NETWORK : xrplNetwork(), amount });
+  const settled =
+    isXrplAsset(asset) && xrplOn ? "xrpl:settled" : asset === "USDC" && usdcOn ? "usdc:settled" : "mock:settled";
   const response = Buffer.from(
-    JSON.stringify({ success: true, asset, network: xrplNetwork() }),
+    JSON.stringify({ success: true, asset, network: asset === "USDC" ? X402_NETWORK : xrplNetwork() }),
     "utf8",
   ).toString("base64");
   res.setHeader("PAYMENT-RESPONSE", response);
-  res.setHeader("X-PAYMENT-RESPONSE", live && isXrplAsset(asset) ? "xrpl:settled" : "mock:settled");
+  res.setHeader("X-PAYMENT-RESPONSE", settled);
   next();
 }
 
 export function attachX402(_app: Express): void {
   /*
-   * Live Base USDC x402. Install and uncomment:
-   *   npm install @x402/express @x402/evm @x402/core
-   *
-   * Live XRPL via x402-xrpl (replaces the custom /mcp 402 with XRPL-only):
-   *   npm install x402-xrpl
-   *   import { requirePayment } from "x402-xrpl/express";
-   *   _app.use(requirePayment({
-   *     path: "/mcp",
-   *     price: process.env.XRPL_PRICE_DROPS || "1000",
-   *     payToAddress: process.env.XRPL_PAY_TO_ADDRESS!,
-     *     network: process.env.XRPL_NETWORK ?? "xrpl:0",
-   *     facilitatorUrl: process.env.XRPL_FACILITATOR_URL,
-   *     asset: "XRP",
-   *     extra: { sourceTag: Number(process.env.XRPL_SOURCE_TAG ?? "804681468") },
-   *   }));
+   * Dual-rail live settlement lives in x402MockMiddleware:
+   *   X402_USDC_LIVE=true  → PayAI (or X402_USDC_FACILITATOR_URL) for Base USDC
+   *   X402_XRPL_LIVE=true  → T54 facilitator for XRP / RLUSD
+   * USDC proofs are never sent to the XRPL facilitator.
    */
 }

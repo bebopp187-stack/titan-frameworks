@@ -89,3 +89,7 @@ export function recordSettlement(opts: {
 export function xrpEarned(): number {
   return load().xrpDropsEarned / 1_000_000;
 }
+
+export function usdcEarned(): number {
+  return load().usdcAtomicEarned / 1_000_000;
+}

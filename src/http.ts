@@ -6,7 +6,7 @@ import { createTitanServer, SERVER_INFO } from "./server.js";
 import { attachX402, paymentRequiredBody, x402MockMiddleware, xrplNetwork, xrplPriceDrops } from "./services/x402.js";
 import { projectRoot } from "./services/frameworks.js";
 import { loadDocsIndex } from "./services/docs-store.js";
-import { getEarnings, recordMcpCall, xrpEarned } from "./services/earnings.js";
+import { getEarnings, recordMcpCall, xrpEarned, usdcEarned } from "./services/earnings.js";
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -51,15 +51,12 @@ app.get("/tools", (_req, res) => {
     ],
     frameworks: ["langchain", "llamaindex", "ollama", "xrpl"],
     pricing: {
-      httpMcp:
-        process.env.X402_XRPL_LIVE === "true"
-          ? "1000 drops XRP / 0.001 RLUSD"
-          : "$0.001 USDC or 1000 drops XRP / RLUSD",
-      networks:
-        process.env.X402_XRPL_LIVE === "true" ? [xrplNetwork()] : ["eip155:8453", xrplNetwork()],
+      httpMcp: "$0.001 USDC or 1000 drops XRP / 0.001 RLUSD",
+      networks: ["eip155:8453", xrplNetwork()],
       xrpDrops: xrplPriceDrops(),
       enabled: process.env.X402_ENABLED === "true",
       xrplLive: process.env.X402_XRPL_LIVE === "true",
+      usdcLive: process.env.X402_USDC_LIVE === "true",
     },
   });
 });
@@ -80,6 +77,8 @@ app.get("/admin/api/stats", (_req, res) => {
     xrpDropsEarned: earnings.xrpDropsEarned,
     totalXrpEarned: xrpEarned().toFixed(6),
     rlusdEarned: earnings.rlusdEarned,
+    usdcAtomicEarned: earnings.usdcAtomicEarned,
+    totalUsdcEarned: usdcEarned().toFixed(6),
     updatedAt: earnings.updatedAt,
     lastSettlement: earnings.lastSettlement ?? null,
   });
