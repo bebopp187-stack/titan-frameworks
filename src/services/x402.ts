@@ -225,6 +225,14 @@ function isXrplAsset(asset: "XRP" | "RLUSD" | "USDC"): asset is "XRP" | "RLUSD" 
   return asset === "XRP" || asset === "RLUSD";
 }
 
+function asV2Requirements(req: unknown): unknown {
+  if (!req || typeof req !== "object") return req;
+  const r = { ...(req as Record<string, unknown>) };
+  const amount = r.amount ?? r.maxAmountRequired;
+  if (amount != null && r.amount == null) r.amount = amount;
+  return r;
+}
+
 async function postFacilitator(
   facilitatorUrl: string,
   proof: string,
@@ -236,7 +244,7 @@ async function postFacilitator(
     x402Version: 2,
     paymentHeader: proof,
     paymentPayload: payload,
-    paymentRequirements: requirements,
+    paymentRequirements: asV2Requirements(requirements),
   };
   try {
     const res = await fetch(`${url}/verify`, {

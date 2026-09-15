@@ -133,6 +133,10 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
 });
 
 app.all("/mcp", x402MockMiddleware, async (req, res) => {
+  const accept = String(req.headers.accept ?? "");
+  if (!accept.includes("application/json") || !accept.includes("text/event-stream")) {
+    req.headers.accept = "application/json, text/event-stream";
+  }
   recordMcpCall();
   const server = createTitanServer();
   const transport = new StreamableHTTPServerTransport({

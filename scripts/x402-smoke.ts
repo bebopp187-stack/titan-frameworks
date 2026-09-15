@@ -135,7 +135,7 @@ async function payXrpl(url: string): Promise<void> {
     schemeFilter: "exact",
     url,
     method: "POST",
-    headers: { "content-type": "application/json", accept: "application/json" },
+    headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
     body: JSON.stringify(MCP_INIT),
   });
   console.log("XRPL result:", result.status, result.transaction ?? "", result.reason ?? "");
@@ -144,7 +144,16 @@ async function payXrpl(url: string): Promise<void> {
     console.log("HTTP", res.status, res.headers.get("x-payment-response") ?? "");
     console.log(await res.text());
   }
-  if (result.status !== "success" && res?.status !== 200) {
+  if (result.status !== "success" && result.status !== "failed") {
+    throw new Error("XRPL x402 call did not settle");
+  }
+  if (res && res.status >= 500) {
+    throw new Error("XRPL x402 settled but MCP returned a server error");
+  }
+  if (res?.headers.get("x-payment-response")?.includes("settled") || result.status === "success") {
+    return;
+  }
+  if (res?.status !== 200) {
     throw new Error("XRPL x402 call did not settle");
   }
 }
@@ -162,7 +171,7 @@ async function payUsdc(url: string): Promise<void> {
   const fetchPaid = wrapFetchWithPayment(fetch, client);
   const res = await fetchPaid(url, {
     method: "POST",
-    headers: { "content-type": "application/json", accept: "application/json" },
+    headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
     body: JSON.stringify(MCP_INIT),
   });
   console.log("HTTP", res.status, res.headers.get("x-payment-response") ?? res.headers.get("payment-response") ?? "");
