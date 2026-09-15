@@ -208,7 +208,7 @@ export function openApiDocument() {
           operationId: "mcp",
           summary: "Streamable HTTP MCP (x402)",
           description:
-            "JSON-RPC MCP endpoint. Pay $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then call search_ai_framework_docs, fetch_latest_syntax, or diagnose_framework_error.",
+            "JSON-RPC MCP endpoint. initialize, ping, and tools/list are free. tools/call requires $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then runs search_ai_framework_docs, fetch_latest_syntax, or diagnose_framework_error.",
           "x-payment-info": {
             protocols: ["x402"],
             price: { mode: "fixed", currency: "USD", amount: "0.001" },

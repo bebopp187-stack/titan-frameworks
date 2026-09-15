@@ -39,7 +39,7 @@ x402-capable clients send `PAYMENT-SIGNATURE` / `X-PAYMENT` after a 402. Local s
 | `GET /.well-known/x402` | x402scan resource index |
 | `GET /.well-known/x402.json` | full payment requirements + bazaar metadata |
 | `GET /.well-known/mcp/server-card.json` | Smithery static card |
-| `ALL /mcp` | Streamable HTTP MCP (paid in production) |
+| `ALL /mcp` | Streamable HTTP MCP. Handshake/`tools/list` free; `tools/call` paid |
 
 ## Run locally (stdio)
 
@@ -71,7 +71,7 @@ Railway uses `railway.toml` (`npm run start`). Vercel rewrites to `api/index.ts`
 
 ## x402 micropayments
 
-**Production billing is on.** `POST https://titan-frameworks-production.up.railway.app/mcp` without a payment header returns **402**.
+**Production billing is on.** Unpaid `tools/call` on `POST https://titan-frameworks-production.up.railway.app/mcp` returns **402**. `initialize`, `ping`, and `tools/list` are free so directories can health-check the connector.
 
 | Rail | Price | Network | Facilitator |
 | --- | --- | --- | --- |

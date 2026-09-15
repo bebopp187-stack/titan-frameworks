@@ -308,9 +308,32 @@ async function verifyUsdc(proof: string, resource: string, decoded: unknown): Pr
   return postFacilitator(usdcFacilitatorUrl(), proof, requirementsFromProof(decoded, resource, "USDC"), resource);
 }
 
+const PAID_MCP_METHODS = new Set(["tools/call"]);
+
+function jsonRpcMethods(body: unknown): string[] {
+  if (Array.isArray(body)) {
+    return body.flatMap((item) => jsonRpcMethods(item));
+  }
+  if (body && typeof body === "object" && "method" in body) {
+    const method = (body as { method?: unknown }).method;
+    if (typeof method === "string" && method.trim()) return [method];
+  }
+  return [];
+}
+
+/**
+ * Charge `tools/call` only. Directories (Glama, Smithery) health-check with
+ * unpaid `initialize` + `tools/list` and treat HTTP 402 as a dead connector.
+ * GET/DELETE are Streamable HTTP session channels, not tool execution.
+ */
+export function mcpHttpRequiresPayment(httpMethod: string, body: unknown): boolean {
+  if (httpMethod.toUpperCase() !== "POST") return false;
+  return jsonRpcMethods(body).some((method) => PAID_MCP_METHODS.has(method));
+}
+
 /**
  * Lightweight x402 gate (Base USDC + XRPL XRP/RLUSD). Enable with X402_ENABLED=true.
- * Missing PAYMENT-SIGNATURE / X-Payment-Signature → HTTP 402 with accepts[].
+ * Missing PAYMENT-SIGNATURE / X-Payment-Signature on paid methods → HTTP 402 with accepts[].
  */
 export async function x402MockMiddleware(
   req: Request,
@@ -318,6 +341,10 @@ export async function x402MockMiddleware(
   next: NextFunction,
 ): Promise<void> {
   if (process.env.X402_ENABLED !== "true") {
+    next();
+    return;
+  }
+  if (!mcpHttpRequiresPayment(req.method, req.body)) {
     next();
     return;
   }

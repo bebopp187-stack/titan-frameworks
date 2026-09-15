@@ -15,7 +15,7 @@
     "start:stdio": "node dist/index.js",
     "index-docs": "tsx scripts/index-docs.ts",
     "x402-smoke": "tsx scripts/x402-smoke.ts",
-    "test": "tsx scripts/smoke.ts",
+    "test": "tsx scripts/smoke.ts && tsx scripts/x402-gate.ts",
     "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },
   "keywords": [
