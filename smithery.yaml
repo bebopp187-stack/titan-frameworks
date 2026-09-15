@@ -2,7 +2,7 @@ version: 1
 
 name: titan-frameworks
 displayName: Titan Frameworks
-description: Paid MCP tools for live LangChain, LlamaIndex, Ollama, and XRPL docs. $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD.
+description: Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs, plus runnable examples and XRPL tx skeletons. $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD.
 homepage: https://titan-frameworks-production.up.railway.app
 documentation: https://titan-frameworks-production.up.railway.app/llms.txt
 
@@ -23,7 +23,9 @@ keywords:
   - ollama
   - xrpl
   - x402
-  - docs
+  - review
+  - rewrite
+  - agents
 
 features:
   tools: true

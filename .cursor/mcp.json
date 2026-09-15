@@ -3,6 +3,10 @@
     "titan-frameworks": {
       "command": "npx",
       "args": ["tsx", "src/index.ts"]
+    },
+    "titan-frameworks-paid": {
+      "command": "npx",
+      "args": ["tsx", "scripts/cursor-x402-proxy.ts"]
     }
   }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.bebopp187-stack/titan-frameworks",
   "title": "Titan Frameworks",
-  "description": "Paid MCP tools for live LangChain, LlamaIndex, Ollama, and XRPL docs.",
+  "description": "Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs, plus runnable examples and XRPL tx skeletons.",
   "version": "1.0.0",
   "websiteUrl": "https://titan-frameworks-production.up.railway.app/llms.txt",
   "repository": {

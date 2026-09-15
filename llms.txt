@@ -1,8 +1,8 @@
 # Titan Frameworks MCP
 
-> Live, token-efficient documentation tools for fast-evolving AI frameworks.
+> Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs, plus runnable examples and XRPL tx skeletons. Live docs included.
 
-Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`).
+Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`). Results are catalog-backed, not guessed.
 
 **Production MCP:** `https://titan-frameworks-production.up.railway.app/mcp`  
 Production HTTP `/mcp` is billed with x402 at **$0.001 USDC on Base** or **1000 drops XRP / 0.001 RLUSD** on XRPL mainnet.
@@ -30,6 +30,16 @@ Local stdio mode (`npx tsx src/index.ts`) does not charge.
 - **Production:** billing is live (`X402_ENABLED=true`, `X402_USDC_LIVE=true`, `X402_XRPL_LIVE=true`). Missing payment headers on `tools/call` return HTTP 402 with machine-readable `accepts[]` plus PayAI bazaar / x402scan discovery metadata. Handshake methods stay unpaid.
 - **Live Base USDC:** PayAI facilitator `https://facilitator.payai.network`.
 - **Live XRPL:** T54 facilitator `https://xrpl-facilitator-mainnet.t54.ai` (`XRPL_NETWORK=xrpl:0`).
+
+## Which tool to call
+
+- Stack trace / exception → `diagnose_framework_error`
+- Source you are about to run → `review_framework_code`, then `rewrite_framework_code` for a patched file
+- Know the API name, not the import → `resolve_symbol`
+- Need a complete runnable file → `fetch_working_example`
+- Need a topic fragment → `fetch_latest_syntax`
+- Open-ended concept → `search_ai_framework_docs`
+- XRPL Payment / TrustSet / RLUSD / channel → `draft_xrpl_intent_tx` (never submits)
 
 ## Tools (JSON Schema)
 
@@ -211,4 +221,4 @@ Refresh: nightly in production when the index is older than 24 hours. Local: `np
 
 ## Agent notes
 
-Keep tool arguments short. Responses are already truncated for context windows (top hits, ~1.2k chars/chunk). Prefer `fetch_latest_syntax` or `fetch_working_example` before pasting large docs into a prompt. Lint with `review_framework_code` before running agent-written code.
+Keep tool arguments short. Responses are already truncated for context windows (top hits, ~1.2k chars/chunk). Prefer `fetch_latest_syntax` or `fetch_working_example` before pasting large docs into a prompt. Lint with `review_framework_code` before running agent-written code. HTTP `tools/call` is paid; `initialize` / `tools/list` are free.

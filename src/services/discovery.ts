@@ -1,12 +1,15 @@
 /** Public MCP tool + x402 bazaar metadata for Smithery, PayAI, x402scan, and the MCP registry. */
 
 import {
+  AGENT_INSTRUCTIONS,
   DIAGNOSE_ERROR_DESCRIPTION,
   FETCH_SYNTAX_DESCRIPTION,
   RESOLVE_SYMBOL_DESCRIPTION,
   REVIEW_CODE_DESCRIPTION,
   REWRITE_CODE_DESCRIPTION,
   SEARCH_DOCS_DESCRIPTION,
+  SERVER_DESCRIPTION,
+  SERVER_DESCRIPTION_PAID,
   WORKING_EXAMPLE_DESCRIPTION,
   XRPL_INTENT_TX_DESCRIPTION,
 } from "../mcp/tool-copy.js";
@@ -290,7 +293,9 @@ export function mcpServerCard(version: string) {
     serverInfo: {
       name: "Titan Frameworks",
       version,
+      description: SERVER_DESCRIPTION,
     },
+    instructions: AGENT_INSTRUCTIONS,
     authentication: {
       required: false,
       schemes: ["x402"],
@@ -321,8 +326,7 @@ export function openApiDocument() {
     info: {
       title: "Titan Frameworks MCP",
       version: "1.0.0",
-      description:
-        "Paid Streamable HTTP MCP for live LangChain, LlamaIndex, Ollama, and XRPL docs.",
+      description: SERVER_DESCRIPTION_PAID,
     },
     servers: [{ url: PRODUCTION_ORIGIN }],
     paths: {

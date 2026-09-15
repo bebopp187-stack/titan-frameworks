@@ -1,6 +1,6 @@
 # Titan Frameworks
 
-MCP server that indexes and serves **token-efficient** docs for LangChain, LlamaIndex, Ollama, and **XRPL (xrpl.js / xrpl-py)**.
+Paid MCP that **reviews and rewrites** LangChain, LlamaIndex, Ollama, and **XRPL** code against current APIs — plus runnable examples, import lookup, and tx skeletons that never submit. Live docs are still included.
 
 **Live Streamable HTTP:** `https://titan-frameworks-production.up.railway.app/mcp`  
 Paid with **x402**: **$0.001 USDC on Base** or **1000 drops XRP / 0.001 RLUSD** on XRPL mainnet.
@@ -19,6 +19,8 @@ Agent discovery: [`llms.txt`](https://titan-frameworks-production.up.railway.app
 | `resolve_symbol` | Package, install, import, and call shape for one API name |
 | `fetch_working_example` | Complete runnable file for a goal (agent, rag, payment, …) |
 | `draft_xrpl_intent_tx` | Typed XRPL tx skeleton. Never submits or moves funds |
+
+Pick one: stack trace → `diagnose_framework_error`; source about to run → `review_framework_code`; need a patched file → `rewrite_framework_code`; know the symbol → `resolve_symbol`; need a full file → `fetch_working_example`; topic fragment → `fetch_latest_syntax`; concept → `search_ai_framework_docs`; XRPL tx → `draft_xrpl_intent_tx`.
 
 ## Connect a client
 

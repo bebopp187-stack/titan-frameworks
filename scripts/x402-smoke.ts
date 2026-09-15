@@ -17,14 +17,13 @@ const ENV_PATH = path.join(ROOT, ".env");
 const DEFAULT_URL = "https://titan-frameworks-production.up.railway.app/mcp";
 const XRPL_WS = "wss://xrplcluster.com";
 
-const MCP_INIT = {
+const MCP_CALL = {
   jsonrpc: "2.0",
-  id: 1,
-  method: "initialize",
+  id: 3,
+  method: "tools/call",
   params: {
-    protocolVersion: "2024-11-05",
-    capabilities: {},
-    clientInfo: { name: "titan-x402-smoke", version: "0" },
+    name: "search_ai_framework_docs",
+    arguments: { framework: "langchain", query: "LCEL agent RAG" },
   },
 };
 
@@ -136,7 +135,7 @@ async function payXrpl(url: string): Promise<void> {
     url,
     method: "POST",
     headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
-    body: JSON.stringify(MCP_INIT),
+    body: JSON.stringify(MCP_CALL),
   });
   console.log("XRPL result:", result.status, result.transaction ?? "", result.reason ?? "");
   const res = result.response;
@@ -172,11 +171,13 @@ async function payUsdc(url: string): Promise<void> {
   const res = await fetchPaid(url, {
     method: "POST",
     headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
-    body: JSON.stringify(MCP_INIT),
+    body: JSON.stringify(MCP_CALL),
   });
   console.log("HTTP", res.status, res.headers.get("x-payment-response") ?? res.headers.get("payment-response") ?? "");
   console.log(await res.text());
   if (res.status === 402) throw new Error("USDC x402 call still returned 402");
+  const settled = res.headers.get("x-payment-response") ?? res.headers.get("payment-response") ?? "";
+  if (!settled) throw new Error("USDC call returned 200 without a payment response (handshake is free; expected a paid tools/call)");
 }
 
 async function main(): Promise<void> {

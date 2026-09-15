@@ -1,5 +1,24 @@
 /** Agent-facing copy for MCP tools. Glama TDQS and Smithery both read this. */
 
+export const SERVER_DESCRIPTION =
+  "Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs, plus runnable examples, import lookup, and XRPL tx skeletons that never submit. Live docs included.";
+
+export const SERVER_DESCRIPTION_PAID =
+  `${SERVER_DESCRIPTION} $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD.`;
+
+export const AGENT_INSTRUCTIONS = `Titan Frameworks patches LangChain, LlamaIndex, Ollama, and XRPL code against current APIs. Results are catalog-backed, not LLM-guessed. HTTP tools/call is paid ($0.001 USDC or 1000 drops XRP); initialize and tools/list are free.
+
+Pick one tool:
+- diagnose_framework_error — you have a stack trace
+- review_framework_code — source you are about to run
+- rewrite_framework_code — review found hits; you want a patched file
+- resolve_symbol — you know the API name, not the package/import
+- fetch_working_example — you need a complete runnable file
+- fetch_latest_syntax — you need a topic fragment (agents, rag, payment, …)
+- search_ai_framework_docs — open-ended concept or docs lookup
+- draft_xrpl_intent_tx — XRPL Payment/TrustSet/RLUSD/channel skeleton; never submits`;
+
+
 export const SEARCH_DOCS_DESCRIPTION =
   "Keyword search over a local Markdown index for langchain, llamaindex, ollama, or xrpl; returns compact chunks and never live-crawls. Use for concepts, symbols, or questions; hitCount 0 means no match — shorten the query. Do not use for stack traces (diagnose_framework_error), import/package lookup (resolve_symbol), or copy-paste current syntax (fetch_latest_syntax). Paid tools/call: $0.001 USDC or 1000 drops XRP.";
 

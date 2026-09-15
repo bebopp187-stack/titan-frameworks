@@ -1,7 +1,7 @@
 {
   "name": "titan-frameworks",
   "version": "1.0.0",
-  "description": "Paid MCP tools for live LangChain, LlamaIndex, Ollama, and XRPL docs.",
+  "description": "Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs, plus runnable examples and XRPL tx skeletons.",
   "type": "module",
   "main": "dist/http.js",
   "engines": {
@@ -15,6 +15,8 @@
     "start:stdio": "node dist/index.js",
     "index-docs": "tsx scripts/index-docs.ts",
     "x402-smoke": "tsx scripts/x402-smoke.ts",
+    "dev:paid": "tsx scripts/cursor-x402-proxy.ts",
+    "paid-tools-smoke": "tsx scripts/paid-tools-smoke.ts",
     "test": "tsx scripts/smoke.ts && tsx scripts/x402-gate.ts",
     "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },
@@ -24,7 +26,9 @@
     "llamaindex",
     "ollama",
     "xrpl",
-    "x402"
+    "x402",
+    "review",
+    "rewrite"
   ],
   "license": "MIT",
   "dependencies": {

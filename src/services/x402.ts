@@ -152,10 +152,10 @@ export function mcpResourceInfo(url: string) {
   return {
     url,
     description:
-      "Token-efficient LangChain, LlamaIndex, Ollama, and XRPL docs via MCP (search, syntax, error diagnosis)",
+      "Review and rewrite LangChain, LlamaIndex, Ollama, and XRPL code against current APIs. Docs, examples, and XRPL tx skeletons included.",
     mimeType: "application/json",
     serviceName: "Titan Frameworks",
-    tags: ["mcp", "langchain", "llamaindex", "ollama", "xrpl", "docs", "x402"],
+    tags: ["mcp", "langchain", "llamaindex", "ollama", "xrpl", "review", "rewrite", "x402"],
   };
 }
 
