@@ -1,0 +1,256 @@
+[
+  {
+    "id": "lc-chat",
+    "framework": "langchain",
+    "topics": ["chat", "models", "init", "install"],
+    "versionNote": "LangChain 0.3+/1.x — partner chats live in langchain-<vendor>; init_chat_model is the stable entry point.",
+    "imports": [
+      "from langchain.chat_models import init_chat_model",
+      "from langchain_openai import ChatOpenAI",
+      "from langchain_core.messages import HumanMessage, SystemMessage"
+    ],
+    "snippets": [
+      {
+        "title": "Provider-agnostic chat",
+        "language": "python",
+        "code": "from langchain.chat_models import init_chat_model\n\nmodel = init_chat_model(\"openai:gpt-4.1-mini\")\nprint(model.invoke(\"Reply in one sentence: what is LCEL?\").content)"
+      },
+      {
+        "title": "JS ChatOpenAI",
+        "language": "typescript",
+        "code": "import { ChatOpenAI } from \"@langchain/openai\";\nconst model = new ChatOpenAI({ model: \"gpt-4.1-mini\" });\nconst res = await model.invoke(\"Hello\");"
+      }
+    ],
+    "migrationNotes": [
+      "Do not import ChatOpenAI from langchain.chat_models — use langchain_openai or init_chat_model.",
+      "Replace llm.predict() / llm() string calls with model.invoke(messages)."
+    ],
+    "relatedDocs": [
+      { "title": "Chat models", "url": "https://docs.langchain.com/oss/python/langchain/models" }
+    ]
+  },
+  {
+    "id": "lc-lcel",
+    "framework": "langchain",
+    "topics": ["lcel", "chains", "prompt", "compose"],
+    "versionNote": "LCEL (pipe operator) is the supported way to compose prompts, models, and parsers.",
+    "imports": [
+      "from langchain_core.prompts import ChatPromptTemplate",
+      "from langchain_core.output_parsers import StrOutputParser"
+    ],
+    "snippets": [
+      {
+        "title": "prompt | model | parser",
+        "language": "python",
+        "code": "from langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\nfrom langchain.chat_models import init_chat_model\n\nprompt = ChatPromptTemplate.from_messages([\n    (\"system\", \"Be terse.\"),\n    (\"human\", \"{question}\"),\n])\nchain = prompt | init_chat_model(\"openai:gpt-4.1-mini\") | StrOutputParser()\nprint(chain.invoke({\"question\": \"What is a Runnable?\"}))"
+      }
+    ],
+    "migrationNotes": [
+      "LLMChain, SimpleSequentialChain, and ConversationChain should be rewritten as LCEL pipes.",
+      "Use chain.stream() for tokens; chain.batch() for fan-out."
+    ],
+    "relatedDocs": [
+      { "title": "LCEL", "url": "https://docs.langchain.com/oss/python/langchain/lcel" }
+    ]
+  },
+  {
+    "id": "lc-agents",
+    "framework": "langchain",
+    "topics": ["agents", "tools", "react", "langgraph"],
+    "versionNote": "Prefer create_agent or LangGraph create_react_agent. initialize_agent is gone.",
+    "imports": [
+      "from langchain.agents import create_agent",
+      "from langchain_core.tools import tool"
+    ],
+    "snippets": [
+      {
+        "title": "Tool-calling agent",
+        "language": "python",
+        "code": "from langchain.agents import create_agent\nfrom langchain_core.tools import tool\nfrom langchain.chat_models import init_chat_model\n\n@tool\ndef multiply(a: float, b: float) -> float:\n    \"\"\"Multiply two numbers.\"\"\"\n    return a * b\n\nagent = create_agent(init_chat_model(\"openai:gpt-4.1-mini\"), tools=[multiply])\nprint(agent.invoke({\"messages\": [{\"role\": \"user\", \"content\": \"12 * 7\"}]}))"
+      }
+    ],
+    "migrationNotes": [
+      "initialize_agent(..., AgentType.ZERO_SHOT_REACT_DESCRIPTION) → create_agent / create_react_agent.",
+      "AgentExecutor remains only as a compatibility shim; do not start new code on it."
+    ],
+    "relatedDocs": [
+      { "title": "Agents", "url": "https://docs.langchain.com/oss/python/langchain/agents" }
+    ]
+  },
+  {
+    "id": "lc-rag",
+    "framework": "langchain",
+    "topics": ["rag", "retriever", "vectorstore", "retrieval"],
+    "versionNote": "Build RAG with a retriever + create_retrieval_chain, not RetrievalQA.",
+    "imports": [
+      "from langchain_core.vectorstores import InMemoryVectorStore",
+      "from langchain.chains import create_retrieval_chain"
+    ],
+    "snippets": [
+      {
+        "title": "Minimal RAG",
+        "language": "python",
+        "code": "from langchain_core.documents import Document\nfrom langchain_core.vectorstores import InMemoryVectorStore\nfrom langchain_openai import OpenAIEmbeddings, ChatOpenAI\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain.chains.combine_documents import create_stuff_documents_chain\nfrom langchain.chains import create_retrieval_chain\n\ndocs = [Document(page_content=\"LCEL composes Runnables with |\")]\nvs = InMemoryVectorStore.from_documents(docs, OpenAIEmbeddings())\nprompt = ChatPromptTemplate.from_template(\"Context:{context}\\nQ:{input}\")\ncombine = create_stuff_documents_chain(ChatOpenAI(model=\"gpt-4.1-mini\"), prompt)\nrag = create_retrieval_chain(vs.as_retriever(), combine)\nprint(rag.invoke({\"input\": \"What is LCEL?\"})[\"answer\"])"
+      }
+    ],
+    "migrationNotes": [
+      "RetrievalQA.from_chain_type(...) is deprecated.",
+      "ConversationalRetrievalChain → history-aware retriever + LCEL, or a LangGraph node."
+    ],
+    "relatedDocs": [
+      { "title": "RAG", "url": "https://docs.langchain.com/oss/python/langchain/rag" }
+    ]
+  },
+  {
+    "id": "li-index",
+    "framework": "llamaindex",
+    "topics": ["index", "rag", "vector", "query", "chat"],
+    "versionNote": "LlamaIndex 0.10+ / 0.12+: llama_index.core + VectorStoreIndex. ServiceContext is removed.",
+    "imports": [
+      "from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings, Document"
+    ],
+    "snippets": [
+      {
+        "title": "Index + query engine",
+        "language": "python",
+        "code": "from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings\nfrom llama_index.llms.openai import OpenAI\nfrom llama_index.embeddings.openai import OpenAIEmbedding\n\nSettings.llm = OpenAI(model=\"gpt-4.1-mini\")\nSettings.embed_model = OpenAIEmbedding(model=\"text-embedding-3-small\")\ndocs = SimpleDirectoryReader(\"./data\").load_data()\nindex = VectorStoreIndex.from_documents(docs)\nprint(index.as_query_engine().query(\"What changed in the latest release?\"))"
+      },
+      {
+        "title": "Chat engine",
+        "language": "python",
+        "code": "chat = index.as_chat_engine(chat_mode=\"condense_plus_context\")\nprint(chat.chat(\"Follow up on that\"))"
+      }
+    ],
+    "migrationNotes": [
+      "GPTSimpleVectorIndex / GPTVectorStoreIndex → VectorStoreIndex.",
+      "Do not pass service_context=; assign Settings.llm / Settings.embed_model."
+    ],
+    "relatedDocs": [
+      { "title": "Starter tutorial", "url": "https://docs.llamaindex.ai/en/stable/getting_started/starter_example/" }
+    ]
+  },
+  {
+    "id": "li-ollama",
+    "framework": "llamaindex",
+    "topics": ["ollama", "local", "llm", "embeddings"],
+    "versionNote": "Use llama-index-llms-ollama and llama-index-embeddings-ollama packages.",
+    "imports": [
+      "from llama_index.llms.ollama import Ollama",
+      "from llama_index.embeddings.ollama import OllamaEmbedding"
+    ],
+    "snippets": [
+      {
+        "title": "Local LlamaIndex + Ollama",
+        "language": "python",
+        "code": "from llama_index.core import Settings, VectorStoreIndex, Document\nfrom llama_index.llms.ollama import Ollama\nfrom llama_index.embeddings.ollama import OllamaEmbedding\n\nSettings.llm = Ollama(model=\"llama3.2\", request_timeout=120.0)\nSettings.embed_model = OllamaEmbedding(model_name=\"nomic-embed-text\")\nindex = VectorStoreIndex.from_documents([Document(text=\"Ollama serves local models.\")])\nprint(index.as_query_engine().query(\"What does Ollama serve?\"))"
+      }
+    ],
+    "migrationNotes": [
+      "pip install llama-index-llms-ollama llama-index-embeddings-ollama",
+      "Pull models first: ollama pull llama3.2 && ollama pull nomic-embed-text"
+    ],
+    "relatedDocs": [
+      { "title": "Ollama LLM", "url": "https://docs.llamaindex.ai/en/stable/examples/llm/ollama/" }
+    ]
+  },
+  {
+    "id": "li-agents",
+    "framework": "llamaindex",
+    "topics": ["agents", "tools", "function calling"],
+    "versionNote": "FunctionAgent / ReActAgent from llama_index.core.agent.workflow in current releases.",
+    "imports": [
+      "from llama_index.core.agent.workflow import FunctionAgent, AgentWorkflow",
+      "from llama_index.core.tools import FunctionTool"
+    ],
+    "snippets": [
+      {
+        "title": "FunctionAgent",
+        "language": "python",
+        "code": "from llama_index.core.agent.workflow import FunctionAgent\nfrom llama_index.llms.openai import OpenAI\n\nasync def add(a: int, b: int) -> int:\n    \"\"\"Add two integers.\"\"\"\n    return a + b\n\nagent = FunctionAgent(tools=[add], llm=OpenAI(model=\"gpt-4.1-mini\"))\nprint(await agent.run(\"What is 21 + 21?\"))"
+      }
+    ],
+    "migrationNotes": [
+      "OpenAIAgent / ReActAgent constructors from older llama_index.agent paths moved under core.agent.workflow.",
+      "Query-engine-as-tool still works via QueryEngineTool.from_defaults(query_engine)."
+    ],
+    "relatedDocs": [
+      { "title": "Agents", "url": "https://docs.llamaindex.ai/en/stable/use_cases/agents/" }
+    ]
+  },
+  {
+    "id": "ol-chat",
+    "framework": "ollama",
+    "topics": ["chat", "api", "python", "javascript", "rest"],
+    "versionNote": "Ollama current REST: /api/chat for messages, /api/generate for one-shot prompts. OpenAI-compatible /v1 is supported.",
+    "imports": [
+      "import ollama",
+      "import ollama from 'ollama'"
+    ],
+    "snippets": [
+      {
+        "title": "Python chat",
+        "language": "python",
+        "code": "import ollama\nr = ollama.chat(model=\"llama3.2\", messages=[\n    {\"role\": \"user\", \"content\": \"Write a haiku about local LLMs\"},\n])\nprint(r[\"message\"][\"content\"])"
+      },
+      {
+        "title": "REST /api/chat",
+        "language": "bash",
+        "code": "curl http://localhost:11434/api/chat -d '{\n  \"model\": \"llama3.2\",\n  \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}],\n  \"stream\": false\n}'"
+      },
+      {
+        "title": "JS SDK",
+        "language": "typescript",
+        "code": "import ollama from \"ollama\";\nconst r = await ollama.chat({ model: \"llama3.2\", messages: [{ role: \"user\", content: \"Hello\" }] });\nconsole.log(r.message.content);"
+      }
+    ],
+    "migrationNotes": [
+      "Do not send a messages array to /api/generate.",
+      "Use a pulled local tag (llama3.2), not gpt-4, on the OpenAI-compatible /v1 endpoint."
+    ],
+    "relatedDocs": [
+      { "title": "API reference", "url": "https://github.com/ollama/ollama/blob/main/docs/api.md" }
+    ]
+  },
+  {
+    "id": "ol-tools",
+    "framework": "ollama",
+    "topics": ["tools", "function calling", "streaming"],
+    "versionNote": "Chat requests accept a tools array; the model may return message.tool_calls.",
+    "imports": ["import ollama"],
+    "snippets": [
+      {
+        "title": "Tool call loop",
+        "language": "python",
+        "code": "import ollama, json\n\ndef weather(city: str) -> str:\n    return f\"sunny in {city}\"\n\nmessages = [{\"role\": \"user\", \"content\": \"Weather in Austin?\"}]\ntools = [{\n    \"type\": \"function\",\n    \"function\": {\n        \"name\": \"weather\",\n        \"description\": \"Get weather\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]},\n    },\n}]\nr = ollama.chat(model=\"llama3.2\", messages=messages, tools=tools)\nif r[\"message\"].get(\"tool_calls\"):\n    for c in r[\"message\"][\"tool_calls\"]:\n        args = c[\"function\"][\"arguments\"]\n        messages.append(r[\"message\"])\n        messages.append({\"role\": \"tool\", \"content\": weather(**args)})\n    r = ollama.chat(model=\"llama3.2\", messages=messages)\nprint(r[\"message\"][\"content\"])"
+      }
+    ],
+    "migrationNotes": [
+      "Tool calling quality depends on the model (llama3.1+/qwen2.5/etc.).",
+      "Stream with stream=True and iterate chunks; final tool_calls appear on the assembled message."
+    ],
+    "relatedDocs": [
+      { "title": "Tool calling", "url": "https://docs.ollama.com/capabilities/tool-calling" }
+    ]
+  },
+  {
+    "id": "ol-embeddings",
+    "framework": "ollama",
+    "topics": ["embeddings", "embed"],
+    "versionNote": "POST /api/embed (newer) replaces /api/embeddings.",
+    "imports": ["import ollama"],
+    "snippets": [
+      {
+        "title": "Embed texts",
+        "language": "python",
+        "code": "import ollama\nr = ollama.embed(model=\"nomic-embed-text\", input=[\"Titan Frameworks indexes docs\"])\nprint(len(r[\"embeddings\"][0]))"
+      }
+    ],
+    "migrationNotes": [
+      "ollama pull nomic-embed-text (or mxbai-embed-large) before embedding.",
+      "Legacy POST /api/embeddings with prompt= still works on older servers; prefer /api/embed + input."
+    ],
+    "relatedDocs": [
+      { "title": "Embeddings API", "url": "https://github.com/ollama/ollama/blob/main/docs/api.md" }
+    ]
+  }
+]

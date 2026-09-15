@@ -1,0 +1,157 @@
+[
+  {
+    "id": "lc-llmchain",
+    "framework": "langchain",
+    "deprecated": "LLMChain / ConversationChain",
+    "replacement": "LCEL: prompt | model | parser  (or create_agent)",
+    "patterns": [
+      "LLMChain",
+      "ConversationChain",
+      "langchain.chains.llm",
+      "from langchain.chains import",
+      "Chain.run",
+      "predict_and_parse"
+    ],
+    "reason": "Classic chains are deprecated. LangChain now composes runnables (LCEL) or agents.",
+    "fix": "Replace LLMChain(llm=llm, prompt=prompt) with chain = prompt | llm | StrOutputParser(), then chain.invoke({...}).",
+    "snippet": "from langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\nfrom langchain_openai import ChatOpenAI\n\nprompt = ChatPromptTemplate.from_template(\"Answer: {q}\")\nchain = prompt | ChatOpenAI(model=\"gpt-4.1-mini\") | StrOutputParser()\nprint(chain.invoke({\"q\": \"hi\"}))"
+  },
+  {
+    "id": "lc-initialize-agent",
+    "framework": "langchain",
+    "deprecated": "initialize_agent / AgentType.ZERO_SHOT_REACT_DESCRIPTION",
+    "replacement": "create_agent (langchain.agents) or langgraph.prebuilt.create_react_agent",
+    "patterns": [
+      "initialize_agent",
+      "AgentType",
+      "ZERO_SHOT_REACT",
+      "CHAT_CONVERSATIONAL_REACT",
+      "load_tools("
+    ],
+    "reason": "initialize_agent is removed from modern LangChain. Use the new agent API or LangGraph.",
+    "fix": "Use create_agent(model, tools) or create_react_agent(model, tools) and invoke with {\"messages\":[...]} .",
+    "snippet": "from langchain.agents import create_agent\nfrom langchain_openai import ChatOpenAI\n\nagent = create_agent(ChatOpenAI(model=\"gpt-4.1-mini\"), tools=[...])\nagent.invoke({\"messages\": [{\"role\": \"user\", \"content\": \"search X\"}]})"
+  },
+  {
+    "id": "lc-chat-models-path",
+    "framework": "langchain",
+    "deprecated": "langchain.chat_models.ChatOpenAI / langchain.llms.OpenAI",
+    "replacement": "langchain_openai.ChatOpenAI  or  init_chat_model",
+    "patterns": [
+      "langchain.chat_models",
+      "from langchain.llms import OpenAI",
+      "langchain.llms.openai",
+      "ChatOpenAI is not available",
+      "ModuleNotFoundError: No module named 'langchain.chat_models'"
+    ],
+    "reason": "Partner integrations moved to dedicated packages (langchain-openai, langchain-anthropic, ...).",
+    "fix": "pip install langchain-openai and import ChatOpenAI from langchain_openai, or use init_chat_model(\"openai:gpt-4.1-mini\").",
+    "snippet": "from langchain.chat_models import init_chat_model\nmodel = init_chat_model(\"openai:gpt-4.1-mini\")"
+  },
+  {
+    "id": "lc-retrievalqa",
+    "framework": "langchain",
+    "deprecated": "RetrievalQA / ConversationalRetrievalChain",
+    "replacement": "create_retrieval_chain + create_stuff_documents_chain  or a custom LCEL rag graph",
+    "patterns": [
+      "RetrievalQA",
+      "ConversationalRetrievalChain",
+      "from_chain_type",
+      "chain_type=\"stuff\""
+    ],
+    "reason": "RetrievalQA wrappers hide LCEL and break streaming/tool-calling.",
+    "fix": "retriever = vectorstore.as_retriever(); build prompt | model; use create_retrieval_chain(retriever, combine_docs_chain).",
+    "snippet": "from langchain.chains.combine_documents import create_stuff_documents_chain\nfrom langchain.chains import create_retrieval_chain\ncombine = create_stuff_documents_chain(model, prompt)\nrag = create_retrieval_chain(retriever, combine)\nrag.invoke({\"input\": \"What is LCEL?\"})"
+  },
+  {
+    "id": "li-gptsimple",
+    "framework": "llamaindex",
+    "deprecated": "GPTSimpleVectorIndex / GPTVectorStoreIndex",
+    "replacement": "VectorStoreIndex",
+    "patterns": [
+      "GPTSimpleVectorIndex",
+      "GPTVectorStoreIndex",
+      "GPTListIndex",
+      "cannot import name 'GPTSimpleVectorIndex'"
+    ],
+    "reason": "GPT* index names were renamed. Use VectorStoreIndex (and other Index classes) from llama_index.core.",
+    "fix": "from llama_index.core import VectorStoreIndex, SimpleDirectoryReader; index = VectorStoreIndex.from_documents(docs)",
+    "snippet": "from llama_index.core import VectorStoreIndex, SimpleDirectoryReader\ndocs = SimpleDirectoryReader(\"./data\").load_data()\nindex = VectorStoreIndex.from_documents(docs)\nprint(index.as_query_engine().query(\"Summarize\"))"
+  },
+  {
+    "id": "li-servicecontext",
+    "framework": "llamaindex",
+    "deprecated": "ServiceContext / LLMPredictor",
+    "replacement": "llama_index.core.Settings (Settings.llm, Settings.embed_model)",
+    "patterns": [
+      "ServiceContext",
+      "from_defaults",
+      "LLMPredictor",
+      "service_context=",
+      "cannot import name 'ServiceContext'"
+    ],
+    "reason": "ServiceContext is removed. Global/runtime configuration lives on Settings.",
+    "fix": "Set Settings.llm and Settings.embed_model once; do not pass service_context= into indexes.",
+    "snippet": "from llama_index.core import Settings\nfrom llama_index.llms.openai import OpenAI\nfrom llama_index.embeddings.openai import OpenAIEmbedding\nSettings.llm = OpenAI(model=\"gpt-4.1-mini\")\nSettings.embed_model = OpenAIEmbedding(model=\"text-embedding-3-small\")"
+  },
+  {
+    "id": "li-import-path",
+    "framework": "llamaindex",
+    "deprecated": "from llama_index import ...",
+    "replacement": "from llama_index.core import ...  plus integration packages",
+    "patterns": [
+      "from llama_index import",
+      "ModuleNotFoundError: No module named 'llama_index.llms'",
+      "No module named 'llama_index.readers'",
+      "cannot import name 'Document' from 'llama_index'"
+    ],
+    "reason": "The monolith package split: core + llama-index-llms-* + llama-index-embeddings-* + readers.",
+    "fix": "pip install llama-index llama-index-llms-openai llama-index-embeddings-openai. Import Document, VectorStoreIndex from llama_index.core.",
+    "snippet": "from llama_index.core import Document, VectorStoreIndex\nfrom llama_index.llms.openai import OpenAI"
+  },
+  {
+    "id": "ol-generate-vs-chat",
+    "framework": "ollama",
+    "deprecated": "POST /api/generate with a chat-style messages array",
+    "replacement": "POST /api/chat  or  ollama.chat()",
+    "patterns": [
+      "/api/generate",
+      "messages is not valid",
+      "invalid generate request",
+      "ollama.generate("
+    ],
+    "reason": "Multi-turn chat belongs on /api/chat. /api/generate is a single prompt completion API.",
+    "fix": "Use POST /api/chat with { model, messages: [{role, content}] } or client.chat(model=..., messages=...).",
+    "snippet": "import ollama\nr = ollama.chat(model=\"llama3.2\", messages=[{\"role\": \"user\", \"content\": \"hi\"}])\nprint(r[\"message\"][\"content\"])"
+  },
+  {
+    "id": "ol-llama2-name",
+    "framework": "ollama",
+    "deprecated": "llama2 / llama2:latest as a default model tag",
+    "replacement": "llama3.2 (or another pulled model from `ollama list`)",
+    "patterns": [
+      "llama2",
+      "model 'llama2' not found",
+      "pull model manifest: file does not exist",
+      "Error: model 'llama2' not found"
+    ],
+    "reason": "llama2 is no longer the recommended default and may not be pulled.",
+    "fix": "ollama pull llama3.2  then pass model=\"llama3.2\". List local tags with `ollama list`.",
+    "snippet": "ollama pull llama3.2\nollama run llama3.2"
+  },
+  {
+    "id": "ol-openai-base",
+    "framework": "ollama",
+    "deprecated": "OpenAI client pointed at http://localhost:11434/v1 without a pulled model",
+    "replacement": "base_url http://localhost:11434/v1  AND a local model name (not gpt-4)",
+    "patterns": [
+      "model 'gpt-4' not found",
+      "gpt-3.5-turbo",
+      "Invalid model",
+      "11434/v1"
+    ],
+    "reason": "Ollama's OpenAI-compatible endpoint serves local tags, not OpenAI model names.",
+    "fix": "Set openai.base_url to http://localhost:11434/v1 and model to a pulled tag such as llama3.2.",
+    "snippet": "from openai import OpenAI\nclient = OpenAI(base_url=\"http://localhost:11434/v1\", api_key=\"ollama\")\nclient.chat.completions.create(model=\"llama3.2\", messages=[{\"role\":\"user\",\"content\":\"hi\"}])"
+  }
+]

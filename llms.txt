@@ -1,0 +1,112 @@
+# Titan Frameworks MCP
+
+> Live, token-efficient documentation tools for fast-evolving AI frameworks.
+
+Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`) after a $0.001 USDC x402 payment on Base when billing is enabled.
+
+## Endpoints
+
+| Method | Path | Price | Auth |
+| --- | --- | --- | --- |
+| GET | `/health` | free | none |
+| GET | `/llms.txt` | free | none |
+| GET | `/tools` | free | none |
+| POST/GET/DELETE | `/mcp` | $0.001 USDC on Base (`eip155:8453`) when `X402_ENABLED=true` | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` |
+
+Local stdio mode (`npx tsx src/index.ts`) does not charge.
+
+## Pricing
+
+- **Tool calls over HTTP `/mcp`:** `0.001` USDC (6 decimals → `maxAmountRequired: "1000"`)
+- **Network:** Base mainnet (`eip155:8453`)
+- **Asset:** USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
+- **Scheme:** `exact` (x402)
+- **Mock billing:** set `X402_ENABLED=true`. Missing payment headers return HTTP 402 with machine-readable `accepts[]`.
+- **Live billing:** uncomment `@x402/express` wiring in `src/services/x402.ts` and set `X402_PAY_TO`.
+
+## Tools (JSON Schema)
+
+### search_ai_framework_docs
+
+Search locally indexed Markdown for a framework. Returns compact chunks.
+
+```json
+{
+  "name": "search_ai_framework_docs",
+  "input": {
+    "type": "object",
+    "required": ["framework", "query"],
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama"] },
+      "query": { "type": "string" }
+    }
+  },
+  "output": {
+    "type": "object",
+    "required": ["framework", "query", "hitCount", "hits"],
+    "properties": {
+      "hitCount": { "type": "integer" },
+      "hits": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "url": { "type": "string" },
+            "score": { "type": "number" },
+            "chunk": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### fetch_latest_syntax
+
+Working snippets, imports, and migration notes for the latest documented version.
+
+```json
+{
+  "name": "fetch_latest_syntax",
+  "input": {
+    "type": "object",
+    "required": ["framework", "topic"],
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama"] },
+      "topic": { "type": "string", "description": "agents | rag | chat | tools | streaming | migration | embeddings" }
+    }
+  }
+}
+```
+
+### diagnose_framework_error
+
+Match a stack trace against known deprecated APIs and return an exact fix.
+
+```json
+{
+  "name": "diagnose_framework_error",
+  "input": {
+    "type": "object",
+    "required": ["framework", "error_log"],
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama"] },
+      "error_log": { "type": "string" }
+    }
+  }
+}
+```
+
+## Indexed frameworks
+
+- LangChain (`langchain`) — Python/JS LCEL, agents, LangGraph notes
+- LlamaIndex (`llamaindex`) — indexes, Settings, query/chat engines
+- Ollama (`ollama`) — CLI, REST `/api/chat`, Python/JS SDK
+
+Refresh: `npm run index-docs`
+
+## Agent notes
+
+Keep tool arguments short. Responses are already truncated for context windows (top hits, ~1.2k chars/chunk). Prefer `fetch_latest_syntax` before pasting large docs into a prompt.

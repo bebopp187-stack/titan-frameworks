@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+coverage/
+.vercel
+.railway
+src/data/docs-index.sqlite
+src/data/*.sqlite-*

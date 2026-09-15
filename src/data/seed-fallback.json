@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-14T00:00:00.000Z",
+  "frameworks": {
+    "langchain": {
+      "displayName": "LangChain",
+      "indexedAt": "2026-09-14T00:00:00.000Z",
+      "chunkCount": 5,
+      "sources": ["seed"]
+    },
+    "llamaindex": {
+      "displayName": "LlamaIndex",
+      "indexedAt": "2026-09-14T00:00:00.000Z",
+      "chunkCount": 4,
+      "sources": ["seed"]
+    },
+    "ollama": {
+      "displayName": "Ollama",
+      "indexedAt": "2026-09-14T00:00:00.000Z",
+      "chunkCount": 4,
+      "sources": ["seed"]
+    }
+  },
+  "chunks": [
+    {
+      "id": "seed-lc-lcel",
+      "framework": "langchain",
+      "title": "LCEL — compose Runnables with |",
+      "url": "https://docs.langchain.com/oss/python/langchain/lcel",
+      "source": "seed",
+      "headingPath": "LangChain > LCEL",
+      "text": "LCEL (LangChain Expression Language) pipes Runnables: `chain = prompt | model | parser`. Invoke with `chain.invoke(input)`, stream with `chain.stream(input)`, batch with `chain.batch([..])`. Inputs/outputs follow each Runnable's schema. Prefer LCEL over LLMChain. JavaScript: `prompt.pipe(model).pipe(parser)` or the `RunnableSequence` helper.",
+      "tokens": 92,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-lc-models",
+      "framework": "langchain",
+      "title": "Chat models and init_chat_model",
+      "url": "https://docs.langchain.com/oss/python/langchain/models",
+      "source": "seed",
+      "headingPath": "LangChain > Models",
+      "text": "Install a partner package (`pip install langchain-openai`) or call `init_chat_model(\"openai:gpt-4.1-mini\")`. Messages use `SystemMessage` / `HumanMessage` / `AIMessage`. `model.invoke(messages)` returns an `AIMessage`. Do not import `ChatOpenAI` from `langchain.chat_models`. Tool binding: `model.bind_tools(tools)`.",
+      "tokens": 88,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-lc-agents",
+      "framework": "langchain",
+      "title": "Agents replace initialize_agent",
+      "url": "https://docs.langchain.com/oss/python/langchain/agents",
+      "source": "seed",
+      "headingPath": "LangChain > Agents",
+      "text": "`create_agent(model, tools)` builds a tool-calling agent. Invoke with `{\"messages\": [{\"role\":\"user\",\"content\":\"...\"}]}`. LangGraph's `create_react_agent` is the graph equivalent. `initialize_agent` and `AgentType.ZERO_SHOT_REACT_DESCRIPTION` are removed. Define tools with `@tool` from `langchain_core.tools`.",
+      "tokens": 86,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-lc-rag",
+      "framework": "langchain",
+      "title": "RAG without RetrievalQA",
+      "url": "https://docs.langchain.com/oss/python/langchain/rag",
+      "source": "seed",
+      "headingPath": "LangChain > RAG",
+      "text": "Index `Document`s into a vector store, expose `.as_retriever()`, then `create_stuff_documents_chain` + `create_retrieval_chain`. `RetrievalQA.from_chain_type` and `ConversationalRetrievalChain` are deprecated. Splitters: `RecursiveCharacterTextSplitter`. Embeddings come from partner packages (`OpenAIEmbeddings`).",
+      "tokens": 84,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-lc-js",
+      "framework": "langchain",
+      "title": "LangChain.js package layout",
+      "url": "https://docs.langchain.com/oss/javascript/langchain/overview",
+      "source": "seed",
+      "headingPath": "LangChain > JavaScript",
+      "text": "Core: `@langchain/core`. OpenAI: `@langchain/openai`. LangGraph: `@langchain/langgraph`. Import `ChatOpenAI` from `@langchain/openai`, not `langchain/chat_models`. Build LCEL with `.pipe()`. Agents: `createReactAgent` from `@langchain/langgraph/prebuilt`.",
+      "tokens": 72,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-li-core",
+      "framework": "llamaindex",
+      "title": "VectorStoreIndex and Settings",
+      "url": "https://docs.llamaindex.ai/en/stable/getting_started/starter_example/",
+      "source": "seed",
+      "headingPath": "LlamaIndex > Starter",
+      "text": "`from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings, Document`. Set `Settings.llm` and `Settings.embed_model` instead of `ServiceContext`. `index = VectorStoreIndex.from_documents(docs)`; query with `index.as_query_engine().query(...)`; multi-turn with `index.as_chat_engine()`.",
+      "tokens": 80,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-li-imports",
+      "framework": "llamaindex",
+      "title": "Split packages (0.10+)",
+      "url": "https://docs.llamaindex.ai/en/stable/getting_started/installation/",
+      "source": "seed",
+      "headingPath": "LlamaIndex > Install",
+      "text": "`pip install llama-index` pulls core. LLMs: `llama-index-llms-openai`, `llama-index-llms-ollama`. Embeddings: `llama-index-embeddings-openai`, `llama-index-embeddings-ollama`. `from llama_index import GPTSimpleVectorIndex` fails — that name is gone. Use `llama_index.core`.",
+      "tokens": 78,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-li-agents",
+      "framework": "llamaindex",
+      "title": "FunctionAgent workflow",
+      "url": "https://docs.llamaindex.ai/en/stable/use_cases/agents/",
+      "source": "seed",
+      "headingPath": "LlamaIndex > Agents",
+      "text": "Current agents live in `llama_index.core.agent.workflow` (`FunctionAgent`, `AgentWorkflow`, `ReActAgent`). Wrap callables or use `FunctionTool`. Wrap a query engine with `QueryEngineTool.from_defaults(query_engine)`. Older `llama_index.agent.openai.OpenAIAgent` import paths are stale.",
+      "tokens": 76,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-li-ollama",
+      "framework": "llamaindex",
+      "title": "Local models via Ollama",
+      "url": "https://docs.llamaindex.ai/en/stable/examples/llm/ollama/",
+      "source": "seed",
+      "headingPath": "LlamaIndex > Ollama",
+      "text": "`from llama_index.llms.ollama import Ollama` and `from llama_index.embeddings.ollama import OllamaEmbedding`. Example: `Settings.llm = Ollama(model=\"llama3.2\", request_timeout=120)` and `Settings.embed_model = OllamaEmbedding(model_name=\"nomic-embed-text\")`. Pull both models with the Ollama CLI first.",
+      "tokens": 74,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-ol-chat",
+      "framework": "ollama",
+      "title": "Chat API vs generate",
+      "url": "https://github.com/ollama/ollama/blob/main/docs/api.md",
+      "source": "seed",
+      "headingPath": "Ollama > API",
+      "text": "`POST /api/chat` body: `{ \"model\": \"llama3.2\", \"messages\": [{\"role\":\"user\",\"content\":\"...\"}], \"stream\": false }`. Python: `ollama.chat(...)`. JS: `ollama.chat({model, messages})`. `/api/generate` takes `prompt` (not `messages`). OpenAI-compatible: `http://localhost:11434/v1` with a local model tag.",
+      "tokens": 82,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-ol-cli",
+      "framework": "ollama",
+      "title": "CLI: pull, run, list",
+      "url": "https://github.com/ollama/ollama",
+      "source": "seed",
+      "headingPath": "Ollama > CLI",
+      "text": "`ollama pull llama3.2` downloads a tag. `ollama run llama3.2` chats in the terminal. `ollama list` shows local models. `ollama serve` starts the daemon on `11434`. `OLLAMA_HOST` overrides bind address. `llama2` is no longer a safe default — pull an explicit tag.",
+      "tokens": 70,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-ol-tools",
+      "framework": "ollama",
+      "title": "Tool calling",
+      "url": "https://docs.ollama.com/capabilities/tool-calling",
+      "source": "seed",
+      "headingPath": "Ollama > Tools",
+      "text": "Pass `tools` (OpenAI-style function JSON) into `/api/chat`. The response may include `message.tool_calls`. Append the assistant message, then a `role: tool` message with the function result, and call chat again. Quality varies by model (llama3.1+, qwen2.5, etc.).",
+      "tokens": 68,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-ol-embed",
+      "framework": "ollama",
+      "title": "Embeddings",
+      "url": "https://github.com/ollama/ollama/blob/main/docs/api.md",
+      "source": "seed",
+      "headingPath": "Ollama > Embeddings",
+      "text": "`POST /api/embed` with `{ \"model\": \"nomic-embed-text\", \"input\": [\"text\"] }`. Python: `ollama.embed(model=\"nomic-embed-text\", input=[...])`. Legacy `/api/embeddings` used `prompt`. Pull an embedding model separately from the chat model.",
+      "tokens": 62,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    }
+  ]
+}

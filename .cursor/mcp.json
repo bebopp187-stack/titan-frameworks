@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "titan-frameworks": {
+      "command": "npx",
+      "args": ["tsx", "src/index.ts"]
+    }
+  }
+}
