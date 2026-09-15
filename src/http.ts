@@ -6,6 +6,7 @@ import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createTitanServer, SERVER_INFO } from "./server.js";
 import { attachX402, paymentRequiredBody, publicMcpResource, x402MockMiddleware, xrplNetwork, xrplPriceDrops } from "./services/x402.js";
+import { MCP_PUBLIC_TOOLS, mcpServerCard, x402WellKnownIndex } from "./services/discovery.js";
 import { projectRoot } from "./services/frameworks.js";
 import { loadDocsIndex } from "./services/docs-store.js";
 import { recordMcpCall } from "./services/earnings.js";
@@ -60,11 +61,7 @@ app.get("/llms.txt", (_req, res) => {
 
 app.get("/tools", (_req, res) => {
   res.json({
-    tools: [
-      "search_ai_framework_docs",
-      "fetch_latest_syntax",
-      "diagnose_framework_error",
-    ],
+    tools: MCP_PUBLIC_TOOLS.map((tool) => tool.name),
     frameworks: ["langchain", "llamaindex", "ollama", "xrpl"],
     pricing: {
       httpMcp: "$0.001 USDC or 1000 drops XRP / 0.001 RLUSD",
@@ -77,59 +74,16 @@ app.get("/tools", (_req, res) => {
   });
 });
 
+app.get("/.well-known/x402", (_req, res) => {
+  res.json(x402WellKnownIndex());
+});
+
 app.get("/.well-known/x402.json", (req, res) => {
   res.json(paymentRequiredBody(publicMcpResource(req)));
 });
 
 app.get("/.well-known/mcp/server-card.json", (_req, res) => {
-  res.json({
-    serverInfo: {
-      name: SERVER_INFO.title,
-      version: SERVER_INFO.version,
-    },
-    authentication: { required: false, schemes: [] },
-    tools: [
-      {
-        name: "search_ai_framework_docs",
-        description:
-          "Keyword search over locally indexed Markdown for langchain, llamaindex, ollama, or xrpl.",
-        inputSchema: {
-          type: "object",
-          required: ["framework", "query"],
-          properties: {
-            framework: { type: "string" },
-            query: { type: "string" },
-          },
-        },
-      },
-      {
-        name: "fetch_latest_syntax",
-        description: "Working imports, snippets, and migration notes for a framework topic.",
-        inputSchema: {
-          type: "object",
-          required: ["framework", "topic"],
-          properties: {
-            framework: { type: "string" },
-            topic: { type: "string" },
-          },
-        },
-      },
-      {
-        name: "diagnose_framework_error",
-        description: "Match a stack trace against known deprecated APIs and return an exact fix.",
-        inputSchema: {
-          type: "object",
-          required: ["framework", "error_log"],
-          properties: {
-            framework: { type: "string" },
-            error_log: { type: "string" },
-          },
-        },
-      },
-    ],
-    resources: [],
-    prompts: [],
-  });
+  res.json(mcpServerCard(SERVER_INFO.version));
 });
 
 app.all("/mcp", x402MockMiddleware, async (req, res) => {

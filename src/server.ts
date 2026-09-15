@@ -6,7 +6,7 @@ export const SERVER_INFO = {
   name: "titan-frameworks",
   version: "1.0.0",
   title: "Titan Frameworks",
-  websiteUrl: "https://docs.langchain.com",
+  websiteUrl: "https://github.com/bebopp187-stack/titan-frameworks",
 };
 
 export function createTitanServer(): McpServer {

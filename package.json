@@ -1,7 +1,7 @@
 {
   "name": "titan-frameworks",
   "version": "1.0.0",
-  "description": "Titan Frameworks — MCP server that indexes LangChain, LlamaIndex, Ollama, and XRPL docs.",
+  "description": "Paid MCP tools for live LangChain, LlamaIndex, Ollama, and XRPL docs.",
   "type": "module",
   "main": "dist/http.js",
   "engines": {

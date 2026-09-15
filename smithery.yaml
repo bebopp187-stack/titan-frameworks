@@ -1,0 +1,35 @@
+version: 1
+
+name: titan-frameworks
+displayName: Titan Frameworks
+description: Paid MCP tools for live LangChain, LlamaIndex, Ollama, and XRPL docs. $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD.
+homepage: https://titan-frameworks-production.up.railway.app
+documentation: https://titan-frameworks-production.up.railway.app/llms.txt
+
+# Hosted Streamable HTTP MCP — Smithery Gateway proxies to this URL.
+runtime: remote
+
+remote:
+  transport: streamable-http
+  url: https://titan-frameworks-production.up.railway.app/mcp
+
+categories:
+  - developer-tools
+  - documentation
+
+keywords:
+  - langchain
+  - llamaindex
+  - ollama
+  - xrpl
+  - x402
+  - docs
+
+features:
+  tools: true
+  resources: true
+  prompts: false
+
+maintainer:
+  name: Andrew
+  url: https://github.com/bebopp187-stack/titan-frameworks

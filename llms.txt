@@ -2,7 +2,10 @@
 
 > Live, token-efficient documentation tools for fast-evolving AI frameworks.
 
-Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`) after a $0.001 USDC payment on Base **or** 1000 drops XRP / RLUSD on XRPL mainnet when billing is enabled.
+Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`).
+
+**Production MCP:** `https://titan-frameworks-production.up.railway.app/mcp`  
+Production HTTP `/mcp` is billed with x402 at **$0.001 USDC on Base** or **1000 drops XRP / 0.001 RLUSD** on XRPL mainnet.
 
 ## Endpoints
 
@@ -11,7 +14,7 @@ Titan Frameworks is a Model Context Protocol server. Agents call tools over stdi
 | GET | `/health` | free | none |
 | GET | `/llms.txt` | free | none |
 | GET | `/tools` | free | none |
-| POST/GET/DELETE | `/mcp` | $0.001 USDC on Base (`eip155:8453`) **or** 1000 drops XRP / RLUSD on XRPL mainnet (`xrpl:0`) when `X402_ENABLED=true` | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
+| POST/GET/DELETE | `/mcp` | $0.001 USDC on Base (`eip155:8453`) **or** 1000 drops XRP / RLUSD on XRPL mainnet (`xrpl:0`) | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
 | GET | `/admin` | private | `ADMIN_SECRET_KEY` password |
 
 Local stdio mode (`npx tsx src/index.ts`) does not charge.
@@ -22,9 +25,9 @@ Local stdio mode (`npx tsx src/index.ts`) does not charge.
 - **Networks:** Base mainnet (`eip155:8453`) and XRPL mainnet (`xrpl:0`)
 - **Assets:** USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, native `XRP`, RLUSD (`524C555344…` + issuer)
 - **Scheme:** `exact` (x402)
-- **Mock billing:** set `X402_ENABLED=true` without live flags. Missing payment headers return HTTP 402 with machine-readable `accepts[]` (Base + XRPL channels).
-- **Live Base USDC:** `X402_USDC_LIVE=true` plus `X402_USDC_FACILITATOR_URL` (production: `https://facilitator.payai.network`).
-- **Live XRPL verify:** `X402_XRPL_LIVE=true` plus `XRPL_FACILITATOR_URL` (production: `https://xrpl-facilitator-mainnet.t54.ai`, `XRPL_NETWORK=xrpl:0`).
+- **Production:** billing is live (`X402_ENABLED=true`, `X402_USDC_LIVE=true`, `X402_XRPL_LIVE=true`). Missing payment headers return HTTP 402 with machine-readable `accepts[]` plus PayAI bazaar / x402scan discovery metadata.
+- **Live Base USDC:** PayAI facilitator `https://facilitator.payai.network`.
+- **Live XRPL:** T54 facilitator `https://xrpl-facilitator-mainnet.t54.ai` (`XRPL_NETWORK=xrpl:0`).
 
 ## Tools (JSON Schema)
 

@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response, Express } from "express";
 import { recordSettlement } from "./earnings.js";
+import { bazaarExtensions, discoveryOutputSchema, withBazaarPayload } from "./discovery.js";
 
 /** USDC on Base mainnet (6 decimals). $0.001 = 1000 atomic units. */
 export const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
@@ -150,8 +151,11 @@ export function xrplAccepts(resource: string) {
 export function mcpResourceInfo(url: string) {
   return {
     url,
-    description: "Titan Frameworks MCP tool call",
+    description:
+      "Token-efficient LangChain, LlamaIndex, Ollama, and XRPL docs via MCP (search, syntax, error diagnosis)",
     mimeType: "application/json",
+    serviceName: "Titan Frameworks",
+    tags: ["mcp", "langchain", "llamaindex", "ollama", "xrpl", "docs", "x402"],
   };
 }
 
@@ -161,6 +165,8 @@ export function paymentRequiredBody(resource: string) {
     error: "PAYMENT_REQUIRED",
     resource: mcpResourceInfo(resource),
     accepts: [usdcAccept(resource), ...xrplAccepts(resource)],
+    outputSchema: discoveryOutputSchema(),
+    extensions: bazaarExtensions(),
   };
 }
 
@@ -238,9 +244,10 @@ async function postFacilitator(
   facilitatorUrl: string,
   proof: string,
   requirements: unknown,
+  resource: string,
 ): Promise<boolean> {
   const url = facilitatorUrl.replace(/\/$/, "");
-  const payload = decodeProof(proof);
+  const payload = withBazaarPayload(decodeProof(proof), mcpResourceInfo(resource));
   const body = {
     x402Version: 2,
     paymentHeader: proof,
@@ -294,11 +301,11 @@ async function verifyXrpl(
   asset: "XRP" | "RLUSD",
   decoded: unknown,
 ): Promise<boolean> {
-  return postFacilitator(xrplFacilitatorUrl(), proof, requirementsFromProof(decoded, resource, asset));
+  return postFacilitator(xrplFacilitatorUrl(), proof, requirementsFromProof(decoded, resource, asset), resource);
 }
 
 async function verifyUsdc(proof: string, resource: string, decoded: unknown): Promise<boolean> {
-  return postFacilitator(usdcFacilitatorUrl(), proof, requirementsFromProof(decoded, resource, "USDC"));
+  return postFacilitator(usdcFacilitatorUrl(), proof, requirementsFromProof(decoded, resource, "USDC"), resource);
 }
 
 /**
