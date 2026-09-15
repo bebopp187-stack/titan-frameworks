@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import type { DocChunk, DocsIndex, FrameworkId } from "../types/index.js";
@@ -259,17 +259,47 @@ async function indexFramework(framework: FrameworkId): Promise<{ chunks: DocChun
   return { chunks, sources: [...new Set(sources)] };
 }
 
-export async function buildDocsIndex(): Promise<DocsIndex> {
+export interface IndexProgress {
+  running: boolean;
+  percent: number;
+  message: string;
+  framework?: FrameworkId;
+  error?: string;
+}
+
+function previousIndex(): DocsIndex | undefined {
+  const livePath = path.join(dataDir(), "docs-index.json");
+  if (!existsSync(livePath)) return undefined;
+  try {
+    return JSON.parse(readFileSync(livePath, "utf8")) as DocsIndex;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function buildDocsIndex(opts?: {
+  frameworks?: FrameworkId[];
+  onProgress?: (p: Pick<IndexProgress, "percent" | "message" | "framework">) => void;
+}): Promise<DocsIndex> {
   const seedIndex = readJsonFile<DocsIndex>("seed-fallback.json");
+  const prior = previousIndex();
+  const selected = opts?.frameworks ?? (Object.keys(SOURCES) as FrameworkId[]);
   const allChunks: DocChunk[] = [];
   const frameworks: DocsIndex["frameworks"] = {};
+  const total = Math.max(selected.length, 1);
 
-  for (const framework of Object.keys(SOURCES) as FrameworkId[]) {
-    process.stdout.write(`Indexing ${framework}...\n`);
+  for (let i = 0; i < selected.length; i++) {
+    const framework = selected[i];
+    opts?.onProgress?.({
+      percent: Math.round((i / total) * 100),
+      message: `Indexing ${framework}…`,
+      framework,
+    });
     const live = await indexFramework(framework);
-    const used = live.chunks.length > 0
-      ? live.chunks
-      : seedIndex.chunks.filter((c) => c.framework === framework);
+    const used =
+      live.chunks.length > 0
+        ? live.chunks
+        : seedIndex.chunks.filter((c) => c.framework === framework);
     allChunks.push(...used);
     frameworks[framework] = {
       displayName: FRAMEWORK_META[framework].displayName,
@@ -277,7 +307,23 @@ export async function buildDocsIndex(): Promise<DocsIndex> {
       chunkCount: used.length,
       sources: live.sources.length ? live.sources : ["seed"],
     };
-    process.stdout.write(`  ${used.length} chunks\n`);
+    opts?.onProgress?.({
+      percent: Math.round(((i + 1) / total) * 100),
+      message: `${framework}: ${used.length} chunks`,
+      framework,
+    });
+  }
+
+  const skipped = (Object.keys(SOURCES) as FrameworkId[]).filter((id) => !selected.includes(id));
+  for (const framework of skipped) {
+    const kept = (prior?.chunks ?? seedIndex.chunks).filter((c) => c.framework === framework);
+    allChunks.push(...kept);
+    frameworks[framework] = prior?.frameworks?.[framework] ?? {
+      displayName: FRAMEWORK_META[framework].displayName,
+      indexedAt: prior?.updatedAt ?? new Date().toISOString(),
+      chunkCount: kept.length,
+      sources: ["unchanged"],
+    };
   }
 
   return {

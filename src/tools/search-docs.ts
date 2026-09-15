@@ -3,6 +3,7 @@ import { SearchInputSchema, SearchOutputSchema } from "../types/index.js";
 import { normalizeFramework } from "../services/frameworks.js";
 import { searchFrameworkDocs } from "../services/search.js";
 import { jsonError, jsonToolResult } from "../services/tool-result.js";
+import { timedQuery } from "../services/query-log.js";
 
 export function registerSearchDocsTool(server: McpServer): void {
   server.registerTool(
@@ -17,7 +18,10 @@ export function registerSearchDocsTool(server: McpServer): void {
     },
     async ({ framework, query }) => {
       try {
-        return jsonToolResult(searchFrameworkDocs(normalizeFramework(framework), query));
+        const id = normalizeFramework(framework);
+        return await timedQuery(id, "search_ai_framework_docs", async () =>
+          jsonToolResult(searchFrameworkDocs(id, query)),
+        );
       } catch (err) {
         return jsonError((err as Error).message);
       }

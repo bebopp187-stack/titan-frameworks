@@ -60,6 +60,7 @@ function persist(): void {
 }
 
 export function getEarnings(): EarningsSnapshot {
+  loaded = false;
   return { ...load() };
 }
 

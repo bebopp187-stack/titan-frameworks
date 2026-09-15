@@ -1,17 +1,32 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createTitanServer, SERVER_INFO } from "./server.js";
 import { attachX402, paymentRequiredBody, x402MockMiddleware, xrplNetwork, xrplPriceDrops } from "./services/x402.js";
 import { projectRoot } from "./services/frameworks.js";
 import { loadDocsIndex } from "./services/docs-store.js";
-import { getEarnings, recordMcpCall, xrpEarned, usdcEarned } from "./services/earnings.js";
+import { recordMcpCall } from "./services/earnings.js";
 
 const app = express();
-app.use(express.json({ limit: "1mb" }));
+app.use((req, res, nextFn) => {
+  if (
+    req.path === "/admin" ||
+    req.path.startsWith("/admin/") ||
+    req.path.startsWith("/api/admin") ||
+    req.path.startsWith("/_next")
+  ) {
+    nextFn();
+    return;
+  }
+  express.json({ limit: "1mb" })(req, res, nextFn);
+});
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  if (!(req.path === "/admin" || req.path.startsWith("/admin/") || req.path.startsWith("/api/admin") || req.path.startsWith("/_next"))) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, Accept, MCP-Protocol-Version, Mcp-Session-Id, Authorization, X-PAYMENT, PAYMENT-SIGNATURE, X-Payment-Signature",
@@ -58,29 +73,6 @@ app.get("/tools", (_req, res) => {
       xrplLive: process.env.X402_XRPL_LIVE === "true",
       usdcLive: process.env.X402_USDC_LIVE === "true",
     },
-  });
-});
-
-app.get("/admin", (_req, res) => {
-  const file = path.join(projectRoot(), "src", "dashboard", "index.html");
-  res.type("html").send(readFileSync(file, "utf8"));
-});
-
-app.get("/admin/api/stats", (_req, res) => {
-  const index = loadDocsIndex();
-  const earnings = getEarnings();
-  res.json({
-    chunks: index.chunks.length,
-    frameworks: Object.keys(index.frameworks ?? {}),
-    mcpCalls: earnings.mcpCalls,
-    settlements: earnings.settlements,
-    xrpDropsEarned: earnings.xrpDropsEarned,
-    totalXrpEarned: xrpEarned().toFixed(6),
-    rlusdEarned: earnings.rlusdEarned,
-    usdcAtomicEarned: earnings.usdcAtomicEarned,
-    totalUsdcEarned: usdcEarned().toFixed(6),
-    updatedAt: earnings.updatedAt,
-    lastSettlement: earnings.lastSettlement ?? null,
   });
 });
 
@@ -153,10 +145,31 @@ app.all("/mcp", x402MockMiddleware, async (req, res) => {
 
 export default app;
 
-const isVercel = Boolean(process.env.VERCEL);
-if (!isVercel && process.env.MCP_STDIO !== "1") {
+type NextFactory = (opts: { dev?: boolean; dir?: string }) => {
+  prepare: () => Promise<void>;
+  getRequestHandler: () => (req: IncomingMessage, res: ServerResponse) => unknown;
+};
+
+async function start(): Promise<void> {
+  if (process.env.VERCEL || process.env.MCP_STDIO === "1") return;
+  const require = createRequire(import.meta.url);
+  const loaded = require("next") as NextFactory | { default: NextFactory };
+  const createNext = typeof loaded === "function" ? loaded : loaded.default;
+  const dev = process.env.NODE_ENV !== "production";
+  const nextApp = createNext({ dev, dir: projectRoot() });
+  await nextApp.prepare();
+  const handle = nextApp.getRequestHandler();
+  app.use((req, res) => {
+    void handle(req, res);
+  });
   const port = Number(process.env.PORT ?? 3333);
   app.listen(port, "0.0.0.0", () => {
     console.error(`Titan Frameworks HTTP MCP on http://0.0.0.0:${port}/mcp`);
+    console.error(`Admin dashboard on http://0.0.0.0:${port}/admin`);
   });
 }
+
+void start().catch((err: unknown) => {
+  console.error(err);
+  process.exit(1);
+});

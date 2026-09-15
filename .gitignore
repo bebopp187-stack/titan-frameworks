@@ -6,6 +6,8 @@ dist/
 coverage/
 .vercel
 .railway
+.next
 src/data/docs-index.sqlite
 src/data/*.sqlite-*
 src/data/earnings.json
+src/data/query-log.json

@@ -12,7 +12,7 @@ Titan Frameworks is a Model Context Protocol server. Agents call tools over stdi
 | GET | `/llms.txt` | free | none |
 | GET | `/tools` | free | none |
 | POST/GET/DELETE | `/mcp` | $0.001 USDC on Base (`eip155:8453`) **or** 1000 drops XRP / RLUSD on XRPL mainnet (`xrpl:0`) when `X402_ENABLED=true` | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
-| GET | `/admin` | free | none |
+| GET | `/admin` | private | `ADMIN_SECRET_KEY` password |
 
 Local stdio mode (`npx tsx src/index.ts`) does not charge.
 

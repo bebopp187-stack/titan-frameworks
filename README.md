@@ -80,11 +80,17 @@ npm run dev:http
 
 Requests to `/mcp` without `X-PAYMENT` / `PAYMENT-SIGNATURE` / `X-Payment-Signature` return **402** and an `accepts[]` body covering Base USDC **and** XRPL (`XRP` drops + `RLUSD`). Production uses **Base mainnet** USDC (`eip155:8453`, PayAI facilitator) and **XRPL mainnet** (`xrpl:0`, T54 facilitator).
 
-Set `X402_USDC_LIVE=true` so USDC proofs are verified and settled through PayAI (`https://facilitator.payai.network`) before `/mcp` is served. Set `X402_XRPL_LIVE=true` for XRP/RLUSD via T54. A raw USDC transfer is not an x402 proof — clients must retry `/mcp` with `PAYMENT-SIGNATURE`. Admin UI: `GET /admin` (includes **Total XRP Earned** and **Total USDC Earned**).
+Set `X402_USDC_LIVE=true` so USDC proofs are verified and settled through PayAI (`https://facilitator.payai.network`) before `/mcp` is served. Set `X402_XRPL_LIVE=true` for XRP/RLUSD via T54. A raw USDC transfer is not an x402 proof — clients must retry `/mcp` with `PAYMENT-SIGNATURE`.
+
+## Private admin (`/admin`)
+
+Password-gated Next.js dashboard. Set `ADMIN_SECRET_KEY` and open `/admin`. It can trigger a re-index, toggle frameworks, and show query volume plus estimated USDC revenue. Unauthenticated requests receive 401.
 
 ## Layout
 
 ```
+src/app/           Next.js admin UI + /api/admin routes
+src/components/    Admin dashboard React components
 src/tools/         MCP tool handlers
 src/mcp/tools.ts   tool registration (includes xrpl)
 src/indexer/       xrpl.js crawl targets
