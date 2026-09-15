@@ -5,6 +5,7 @@ import { resolveSymbol } from "../src/services/symbols.js";
 import { workingExample } from "../src/services/examples.js";
 import { xrplIntentTx } from "../src/services/xrpl-intents.js";
 import { MCP_PUBLIC_TOOLS } from "../src/services/discovery.js";
+import { listKnownDeprecations, listSupportedFrameworks } from "../src/services/list-catalogs.js";
 
 const search = searchFrameworkDocs("langchain", "LCEL agent RAG");
 const syntax = fetchLatestSyntax("llamaindex", "ollama");
@@ -38,6 +39,9 @@ const ollamaExample = workingExample("ollama", "chat", "python");
 const pay = xrplIntentTx("send xrp", "typescript");
 const missIntent = xrplIntentTx("swap");
 const rippleReview = reviewFrameworkCode("xrpl", 'import RippleAPI from "ripple-lib";\n');
+const frameworks = listSupportedFrameworks();
+const deprecations = listKnownDeprecations();
+const lcDeps = listKnownDeprecations("langchain");
 
 console.log("search hits", search.hitCount, search.hits.map((h) => h.title).join(" | "));
 console.log("syntax topic", syntax.topic, "snippets", syntax.snippets.length);
@@ -50,6 +54,8 @@ console.log("rewrite applied", rewrite.applied.map((a) => a.id).join(" | "), "le
 console.log("resolve", symbol.matched, symbol.package);
 console.log("example", example.matched, example.id);
 console.log("xrpl intent", pay.matched, pay.transactionType, "submits", pay.submits);
+console.log("frameworks", frameworks.count, frameworks.ids.join(","));
+console.log("deprecations", deprecations.count, "langchain", lcDeps.count);
 console.log("public tools", MCP_PUBLIC_TOOLS.length, MCP_PUBLIC_TOOLS.map((t) => t.name).join(", "));
 
 const failures: string[] = [];
@@ -79,7 +85,16 @@ if (!pay.matched || pay.transactionType !== "Payment" || pay.submits !== false |
 if (pay.skeleton.includes("submitAndWait") && !pay.skeleton.includes("//")) failures.push("xrpl-intent-submit");
 if (missIntent.matched) failures.push("xrpl-intent-miss");
 if (!rippleReview.matched) failures.push("ripple-review");
-if (MCP_PUBLIC_TOOLS.length !== 8) failures.push("public-tools-count");
+if (frameworks.count !== 4 || !frameworks.ids.includes("xrpl") || frameworks.frameworks.some((f) => f.topics.length < 1)) {
+  failures.push("list-frameworks");
+}
+if (deprecations.count < 8 || !deprecations.deprecations.some((d) => d.id === "lc-llmchain")) {
+  failures.push("list-deprecations");
+}
+if (lcDeps.count < 1 || lcDeps.deprecations.some((d) => d.framework !== "langchain")) {
+  failures.push("list-deprecations-filter");
+}
+if (MCP_PUBLIC_TOOLS.length !== 10) failures.push("public-tools-count");
 
 if (failures.length > 0) {
   console.error("smoke failed:", failures.join(", "));

@@ -251,6 +251,45 @@ export const XrplIntentOutputSchema = z.object({
   hints: z.array(z.string()),
 });
 
+export const ListFrameworksInputSchema = z.object({});
+
+export const ListFrameworksOutputSchema = z.object({
+  count: z.number().int(),
+  ids: z.array(FrameworkIdSchema),
+  frameworks: z.array(
+    z.object({
+      id: FrameworkIdSchema,
+      displayName: z.string(),
+      homepage: z.string(),
+      aliases: z.array(z.string()),
+      topics: z.array(z.string()),
+    }),
+  ),
+});
+
+export const ListDeprecationsInputSchema = z.object({
+  framework: z
+    .string()
+    .optional()
+    .describe("Optional. One of langchain, llamaindex, ollama, or xrpl. Omit to list every known deprecation"),
+});
+
+export const ListDeprecationsOutputSchema = z.object({
+  framework: z.string(),
+  count: z.number().int(),
+  deprecations: z.array(
+    z.object({
+      id: z.string(),
+      framework: FrameworkIdSchema,
+      deprecated: z.string(),
+      replacement: z.string(),
+      reason: z.string(),
+      fix: z.string(),
+    }),
+  ),
+  hints: z.array(z.string()),
+});
+
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 export type SearchOutput = z.infer<typeof SearchOutputSchema>;
 export type SyntaxInput = z.infer<typeof SyntaxInputSchema>;
@@ -267,6 +306,10 @@ export type WorkingExampleInput = z.infer<typeof WorkingExampleInputSchema>;
 export type WorkingExampleOutput = z.infer<typeof WorkingExampleOutputSchema>;
 export type XrplIntentInput = z.infer<typeof XrplIntentInputSchema>;
 export type XrplIntentOutput = z.infer<typeof XrplIntentOutputSchema>;
+export type ListFrameworksInput = z.infer<typeof ListFrameworksInputSchema>;
+export type ListFrameworksOutput = z.infer<typeof ListFrameworksOutputSchema>;
+export type ListDeprecationsInput = z.infer<typeof ListDeprecationsInputSchema>;
+export type ListDeprecationsOutput = z.infer<typeof ListDeprecationsOutputSchema>;
 
 export interface KnownError {
   id: string;

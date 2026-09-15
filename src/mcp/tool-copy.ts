@@ -16,6 +16,8 @@ Pick one tool:
 - fetch_working_example — you need a complete runnable file
 - fetch_latest_syntax — you need a topic fragment (agents, rag, payment, …)
 - search_ai_framework_docs — open-ended concept or docs lookup
+- list_supported_frameworks — you need the framework ids this server covers
+- list_known_deprecations — you want the deprecation catalog without a stack trace or snippet
 - draft_xrpl_intent_tx — XRPL Payment/TrustSet/RLUSD/channel skeleton; never submits`;
 
 
@@ -42,3 +44,9 @@ export const WORKING_EXAMPLE_DESCRIPTION =
 
 export const XRPL_INTENT_TX_DESCRIPTION =
   "Draft a typed xrpl.js / xrpl-py skeleton for payment, trustline, rlusd, or channel, plus required fields and common tec/tem failure codes. Use when building an XRPL tx; never submits, signs, or moves funds. Prefer fetch_working_example for a full script and review_framework_code to lint Amount/address mistakes. Paid tools/call: $0.001 USDC or 1000 drops XRP.";
+
+export const LIST_FRAMEWORKS_DESCRIPTION =
+  "List the framework ids this server covers (langchain, llamaindex, ollama, xrpl) with display names, aliases, homepages, and catalog topics. Use when you do not know which framework string to pass. Not a docs search (search_ai_framework_docs) and not a deprecation dump (list_known_deprecations). Paid tools/call: $0.001 USDC or 1000 drops XRP; catalog-backed.";
+
+export const LIST_DEPRECATIONS_DESCRIPTION =
+  "Return the known-deprecated API catalog (id, old API, replacement, fix) for one framework or all four at once. Use when you want the full deprecation list without a stack trace or source snippet. Prefer diagnose_framework_error when you have an error_log and review_framework_code when you have code. Paid tools/call: $0.001 USDC or 1000 drops XRP; catalog-backed, does not execute code.";

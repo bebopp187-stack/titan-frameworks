@@ -14,3 +14,5 @@ export { registerRewriteCodeTool } from "../tools/rewrite-code.js";
 export { registerResolveSymbolTool } from "../tools/resolve-symbol.js";
 export { registerWorkingExampleTool } from "../tools/working-example.js";
 export { registerXrplIntentTxTool } from "../tools/xrpl-intent-tx.js";
+export { registerListFrameworksTool } from "../tools/list-frameworks.js";
+export { registerListDeprecationsTool } from "../tools/list-deprecations.js";

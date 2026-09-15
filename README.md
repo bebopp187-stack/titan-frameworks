@@ -19,8 +19,10 @@ Agent discovery: [`llms.txt`](https://titan-frameworks-production.up.railway.app
 | `resolve_symbol` | Package, install, import, and call shape for one API name |
 | `fetch_working_example` | Complete runnable file for a goal (agent, rag, payment, …) |
 | `draft_xrpl_intent_tx` | Typed XRPL tx skeleton. Never submits or moves funds |
+| `list_supported_frameworks` | Enumerate framework ids, aliases, and catalog topics |
+| `list_known_deprecations` | Full deprecation catalog for one framework or all four |
 
-Pick one: stack trace → `diagnose_framework_error`; source about to run → `review_framework_code`; need a patched file → `rewrite_framework_code`; know the symbol → `resolve_symbol`; need a full file → `fetch_working_example`; topic fragment → `fetch_latest_syntax`; concept → `search_ai_framework_docs`; XRPL tx → `draft_xrpl_intent_tx`.
+Pick one: stack trace → `diagnose_framework_error`; source about to run → `review_framework_code`; need a patched file → `rewrite_framework_code`; know the symbol → `resolve_symbol`; need a full file → `fetch_working_example`; topic fragment → `fetch_latest_syntax`; concept → `search_ai_framework_docs`; XRPL tx → `draft_xrpl_intent_tx`; which frameworks → `list_supported_frameworks`; all deprecations → `list_known_deprecations`.
 
 ## Connect a client
 

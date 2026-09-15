@@ -7,6 +7,8 @@ import { registerRewriteCodeTool } from "./rewrite-code.js";
 import { registerResolveSymbolTool } from "./resolve-symbol.js";
 import { registerWorkingExampleTool } from "./working-example.js";
 import { registerXrplIntentTxTool } from "./xrpl-intent-tx.js";
+import { registerListFrameworksTool } from "./list-frameworks.js";
+import { registerListDeprecationsTool } from "./list-deprecations.js";
 
 export function registerTools(server: McpServer): void {
   registerSearchDocsTool(server);
@@ -17,4 +19,6 @@ export function registerTools(server: McpServer): void {
   registerResolveSymbolTool(server);
   registerWorkingExampleTool(server);
   registerXrplIntentTxTool(server);
+  registerListFrameworksTool(server);
+  registerListDeprecationsTool(server);
 }

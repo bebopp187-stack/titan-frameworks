@@ -72,6 +72,16 @@ const CASES: Case[] = [
         ? null
         : `matched=${String(p.matched)} submits=${String(p.submits)}`,
   },
+  {
+    name: "list_supported_frameworks",
+    arguments: {},
+    ok: (p) => (Number(p.count) === 4 && Array.isArray(p.ids) && (p.ids as unknown[]).includes("xrpl") ? null : `count=${String(p.count)}`),
+  },
+  {
+    name: "list_known_deprecations",
+    arguments: { framework: "langchain" },
+    ok: (p) => (Number(p.count) >= 1 && p.framework === "langchain" ? null : `count=${String(p.count)}`),
+  },
 ];
 
 function loadDotEnv(file: string): void {

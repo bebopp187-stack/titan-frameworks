@@ -55,6 +55,10 @@ export function normalizeFramework(value: string): FrameworkId {
   return id;
 }
 
+export function frameworkAliases(id: FrameworkId): string[] {
+  return [...new Set(Object.entries(ALIASES).filter(([, value]) => value === id).map(([key]) => key))].sort();
+}
+
 export function projectRoot(): string {
   let dir = process.cwd();
   for (let i = 0; i < 8; i++) {

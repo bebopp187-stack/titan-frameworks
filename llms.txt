@@ -39,6 +39,8 @@ Local stdio mode (`npx tsx src/index.ts`) does not charge.
 - Need a complete runnable file → `fetch_working_example`
 - Need a topic fragment → `fetch_latest_syntax`
 - Open-ended concept → `search_ai_framework_docs`
+- Which framework ids this server covers → `list_supported_frameworks`
+- Full deprecation catalog (no stack trace) → `list_known_deprecations`
 - XRPL Payment / TrustSet / RLUSD / channel → `draft_xrpl_intent_tx` (never submits)
 
 ## Tools (JSON Schema)
@@ -205,6 +207,36 @@ Typed xrpl.js / xrpl-py skeleton for payment, trustline, rlusd, or channel. Neve
     "properties": {
       "intent": { "type": "string" },
       "language": { "type": "string" }
+    }
+  }
+}
+```
+
+### list_supported_frameworks
+
+Enumerate framework ids, aliases, homepages, and catalog topics. Use when you do not know which `framework` string to pass. Paid `tools/call`.
+
+```json
+{
+  "name": "list_supported_frameworks",
+  "input": {
+    "type": "object",
+    "properties": {}
+  }
+}
+```
+
+### list_known_deprecations
+
+Known-deprecated APIs for one framework or all four. Use when you want the catalog without a stack trace or snippet. Paid `tools/call`.
+
+```json
+{
+  "name": "list_known_deprecations",
+  "input": {
+    "type": "object",
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] }
     }
   }
 }

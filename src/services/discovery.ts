@@ -4,6 +4,8 @@ import {
   AGENT_INSTRUCTIONS,
   DIAGNOSE_ERROR_DESCRIPTION,
   FETCH_SYNTAX_DESCRIPTION,
+  LIST_DEPRECATIONS_DESCRIPTION,
+  LIST_FRAMEWORKS_DESCRIPTION,
   RESOLVE_SYMBOL_DESCRIPTION,
   REVIEW_CODE_DESCRIPTION,
   REWRITE_CODE_DESCRIPTION,
@@ -137,6 +139,21 @@ const XRPL_INTENT_SCHEMA = {
   },
 } as const;
 
+const LIST_FRAMEWORKS_SCHEMA = {
+  type: "object",
+  properties: {},
+} as const;
+
+const LIST_DEPRECATIONS_SCHEMA = {
+  type: "object",
+  properties: {
+    framework: {
+      type: "string",
+      description: "Optional. One of langchain, llamaindex, ollama, or xrpl. Omit to list every known deprecation",
+    },
+  },
+} as const;
+
 export const MCP_PUBLIC_TOOLS = [
   {
     name: "search_ai_framework_docs",
@@ -177,6 +194,16 @@ export const MCP_PUBLIC_TOOLS = [
     name: "draft_xrpl_intent_tx",
     description: XRPL_INTENT_TX_DESCRIPTION,
     inputSchema: XRPL_INTENT_SCHEMA,
+  },
+  {
+    name: "list_supported_frameworks",
+    description: LIST_FRAMEWORKS_DESCRIPTION,
+    inputSchema: LIST_FRAMEWORKS_SCHEMA,
+  },
+  {
+    name: "list_known_deprecations",
+    description: LIST_DEPRECATIONS_DESCRIPTION,
+    inputSchema: LIST_DEPRECATIONS_SCHEMA,
   },
 ] as const;
 
@@ -335,7 +362,7 @@ export function openApiDocument() {
           operationId: "mcp",
           summary: "Streamable HTTP MCP (x402)",
           description:
-            "JSON-RPC MCP endpoint. initialize, ping, and tools/list are free. tools/call requires $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then runs a registered Titan tool (docs search, syntax, diagnose, review, rewrite, resolve_symbol, fetch_working_example, or draft_xrpl_intent_tx).",
+            "JSON-RPC MCP endpoint. initialize, ping, and tools/list are free. tools/call requires $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then runs a registered Titan tool.",
           "x-payment-info": {
             protocols: ["x402"],
             price: { mode: "fixed", currency: "USD", amount: "0.001" },
