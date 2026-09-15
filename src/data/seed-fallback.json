@@ -19,6 +19,12 @@
       "indexedAt": "2026-09-14T00:00:00.000Z",
       "chunkCount": 4,
       "sources": ["seed"]
+    },
+    "xrpl": {
+      "displayName": "XRPL (xrpl.js / xrpl-py)",
+      "indexedAt": "2026-09-14T00:00:00.000Z",
+      "chunkCount": 7,
+      "sources": ["seed"]
     }
   },
   "chunks": [
@@ -163,6 +169,83 @@
       "headingPath": "Ollama > Embeddings",
       "text": "`POST /api/embed` with `{ \"model\": \"nomic-embed-text\", \"input\": [\"text\"] }`. Python: `ollama.embed(model=\"nomic-embed-text\", input=[...])`. Legacy `/api/embeddings` used `prompt`. Pull an embedding model separately from the chat model.",
       "tokens": 62,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-xrpl-client",
+      "framework": "xrpl",
+      "title": "xrpl.js Client connect",
+      "url": "https://js.xrpl.org/classes/Client.html",
+      "source": "seed",
+      "headingPath": "XRPL > Client",
+      "text": "`import { Client } from \"xrpl\"`. `const client = new Client(\"wss://s.altnet.rippletest.net:51233\")` (testnet) or `wss://xrplcluster.com` (mainnet). Always `await client.connect()` before requests; `await client.disconnect()` when done. `client.request({ command: \"account_info\", account })` and `client.submitAndWait(tx, { wallet })` are the core RPC/submit APIs. Python: `from xrpl.clients import JsonRpcClient`.",
+      "tokens": 110,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-xrpl-wallet",
+      "framework": "xrpl",
+      "title": "Wallet from seed / generate",
+      "url": "https://js.xrpl.org/classes/Wallet.html",
+      "source": "seed",
+      "headingPath": "XRPL > Wallet",
+      "text": "`Wallet.generate()` or `Wallet.fromSeed(\"s...\")`. Classic address is `wallet.classicAddress` (starts with `r`). Never send X-addresses to APIs that expect classic r-addresses. Python: `from xrpl.wallet import Wallet; Wallet.from_seed(seed)`. Fund testnet wallets via the faucet before Payment txs.",
+      "tokens": 88,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-xrpl-payment",
+      "framework": "xrpl",
+      "title": "Payment transaction payload",
+      "url": "https://xrpl.org/docs/references/protocol/transactions/types/payment",
+      "source": "seed",
+      "headingPath": "XRPL > Payment",
+      "text": "Native XRP Amount is a drops string (`\"1000\"` = 0.001 XRP). Issued currency Amount is `{ currency, issuer, value }`. Autofill: `const tx = await client.autofill({ TransactionType: \"Payment\", Account: wallet.classicAddress, Destination, Amount, SourceTag })`. Then `client.submitAndWait(tx, { wallet })`. Helpers: `xrpToDrops(\"0.001\")` / `dropsToXrp(\"1000\")`.",
+      "tokens": 102,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-xrpl-channels",
+      "framework": "xrpl",
+      "title": "Payment Channels",
+      "url": "https://xrpl.org/docs/concepts/payment-types/payment-channels",
+      "source": "seed",
+      "headingPath": "XRPL > Payment Channels",
+      "text": "`PaymentChannelCreate` locks XRP for off-ledger claims. Follow with `PaymentChannelClaim` (signed claim) and optional `PaymentChannelFund`. Channel IDs are 64-hex. Use channels for high-frequency micro-payments instead of one on-ledger Payment per call. `DestinationTag` / `SourceTag` still apply on create.",
+      "tokens": 86,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-xrpl-trustlines",
+      "framework": "xrpl",
+      "title": "Trustlines and issued assets (RLUSD)",
+      "url": "https://xrpl.org/docs/concepts/tokens/fungible-tokens",
+      "source": "seed",
+      "headingPath": "XRPL > Trustlines",
+      "text": "`TrustSet` creates a trust line: `{ TransactionType: \"TrustSet\", Account, LimitAmount: { currency: \"USD\", issuer, value: \"1000\" } }`. RLUSD uses currency hex `524C555344000000000000000000000000000000` and issuer `rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De` on mainnet. IOU Payments set `Amount: { currency, issuer, value }` — never a drops string.",
+      "tokens": 108,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-xrpl-hooks",
+      "framework": "xrpl",
+      "title": "Hooks vs xrpl.js",
+      "url": "https://xrpl.org/docs/concepts",
+      "source": "seed",
+      "headingPath": "XRPL > Hooks",
+      "text": "On-ledger Hooks (C smart contracts on transactions) are not a first-class xrpl.js API on XRPL mainnet today; they are used on Xahau / Hooks-enabled networks via `SetHook` / `SetHook` transaction types. xrpl.js still submits those tx blobs if the network supports them. For app logic on mainnet, use Payments, Escrow, Checks, or side-chain contracts instead of assuming Hooks.",
+      "tokens": 96,
+      "updatedAt": "2026-09-14T00:00:00.000Z"
+    },
+    {
+      "id": "seed-xrpl-py",
+      "framework": "xrpl",
+      "title": "xrpl-py syntax references",
+      "url": "https://xrpl-py.readthedocs.io/",
+      "source": "seed",
+      "headingPath": "XRPL > xrpl-py",
+      "text": "`from xrpl.clients import JsonRpcClient; from xrpl.wallet import Wallet; from xrpl.models.transactions import Payment; from xrpl.transaction import submit_and_wait; from xrpl.utils import xrp_to_drops`. `Payment(account=, destination=, amount=xrp_to_drops(\"0.001\"))`. Same Amount rules as xrpl.js: drops string vs `{currency, issuer, value}`.",
+      "tokens": 90,
       "updatedAt": "2026-09-14T00:00:00.000Z"
     }
   ]

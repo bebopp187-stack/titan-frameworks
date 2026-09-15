@@ -1,6 +1,6 @@
 # Titan Frameworks
 
-MCP server that indexes and serves **token-efficient** docs for fast-moving AI libraries — starting with **LangChain**, **LlamaIndex**, and **Ollama**.
+MCP server that indexes and serves **token-efficient** docs for fast-moving AI libraries — LangChain, LlamaIndex, Ollama, and **XRPL (xrpl.js / xrpl-py)**.
 
 Agents get three tools:
 
@@ -74,18 +74,22 @@ Default is **off**. To mock-gate HTTP tool calls:
 
 ```bash
 set X402_ENABLED=true
-set X402_PAY_TO=0xYourAddress
+set X402_PAY_TO=0x584c004037bc369b3b49bd18381a5a6d0c1c1215
 npm run dev:http
 ```
 
-Requests to `/mcp` without `X-PAYMENT` / `PAYMENT-SIGNATURE` return **402** and an `accepts[]` body ($0.001 USDC, `eip155:8453`). Live settlement: install `@x402/express` and uncomment the block in `src/services/x402.ts`.
+Requests to `/mcp` without `X-PAYMENT` / `PAYMENT-SIGNATURE` / `X-Payment-Signature` return **402** and an `accepts[]` body covering Base USDC **and** XRPL (`XRP` drops + `RLUSD`). Set `XRPL_PAY_TO_ADDRESS`, `XRPL_PRICE_DROPS=1000`, `XRPL_NETWORK=xrpl:1`, and `XRPL_FACILITATOR_URL`. Admin UI: `GET /admin` (includes **Total XRP Earned**).
 
 ## Layout
 
 ```
-src/tools/       MCP tool handlers
-src/services/    search, indexer, store, x402
-src/data/        JSON index, syntax catalog, known errors
-src/types/       Zod schemas + TS types
-scripts/         npm run index-docs
+src/tools/         MCP tool handlers
+src/mcp/tools.ts   tool registration (includes xrpl)
+src/indexer/       xrpl.js crawl targets
+src/middleware/    x402 (Base USDC + XRPL/RLUSD)
+src/dashboard/     admin UI
+src/services/      search, indexer, store, x402, earnings
+src/data/          JSON index, syntax catalog, known errors
+src/types/         Zod schemas + TS types
+scripts/           npm run index-docs
 ```

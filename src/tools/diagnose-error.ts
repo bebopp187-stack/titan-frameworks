@@ -10,7 +10,7 @@ export function registerDiagnoseErrorTool(server: McpServer): void {
     {
       title: "Diagnose Framework Error",
       description:
-        "Match a stack trace against known deprecated APIs for langchain, llamaindex, or ollama and return an exact fix.",
+        "Match a stack trace against known deprecated APIs for langchain, llamaindex, ollama, or xrpl and return an exact fix.",
       inputSchema: DiagnoseInputSchema,
       outputSchema: DiagnoseOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },

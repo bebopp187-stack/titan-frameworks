@@ -10,7 +10,7 @@ export function registerSearchDocsTool(server: McpServer): void {
     {
       title: "Search AI Framework Docs",
       description:
-        "Keyword search over locally indexed Markdown for langchain, llamaindex, or ollama. Returns compact chunks.",
+        "Keyword search over locally indexed Markdown for langchain, llamaindex, ollama, or xrpl. Returns compact chunks.",
       inputSchema: SearchInputSchema,
       outputSchema: SearchOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },

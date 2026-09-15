@@ -3,6 +3,7 @@ import { writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import type { DocChunk, DocsIndex, FrameworkId } from "../types/index.js";
+import { XRPL_CRAWL_TARGET, type CrawlSourceSpec } from "../indexer/crawl.js";
 import { dataDir, FRAMEWORK_META, readJsonFile } from "./frameworks.js";
 import { toCleanMarkdown } from "./html-to-markdown.js";
 import { estimateTokens } from "./search.js";
@@ -12,14 +13,7 @@ const MAX_PAGES = 28;
 const MAX_CHARS = 180_000;
 const CHUNK_CHARS = 1600;
 
-interface SourceSpec {
-  llmsTxt: string[];
-  releases: string;
-  extra: string[];
-  githubDocs?: { repo: string; path: string };
-}
-
-export const SOURCES: Record<FrameworkId, SourceSpec> = {
+export const SOURCES: Record<FrameworkId, CrawlSourceSpec> = {
   langchain: {
     llmsTxt: [
       "https://docs.langchain.com/llms.txt",
@@ -47,6 +41,7 @@ export const SOURCES: Record<FrameworkId, SourceSpec> = {
     ],
     githubDocs: { repo: "ollama/ollama", path: "docs" },
   },
+  xrpl: XRPL_CRAWL_TARGET,
 };
 
 function sleep(ms: number): Promise<void> {

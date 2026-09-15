@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const FRAMEWORK_IDS = ["langchain", "llamaindex", "ollama"] as const;
+export const FRAMEWORK_IDS = ["langchain", "llamaindex", "ollama", "xrpl"] as const;
 export type FrameworkId = (typeof FRAMEWORK_IDS)[number];
 
 export const FrameworkIdSchema = z.enum(FRAMEWORK_IDS);
@@ -37,7 +37,7 @@ export interface DocsIndex {
 export const SearchInputSchema = z.object({
   framework: z
     .string()
-    .describe("Target library: langchain | llamaindex | ollama"),
+    .describe("Target library: langchain | llamaindex | ollama | xrpl"),
   query: z.string().min(1).describe("Keyword or natural-language search query"),
 });
 
@@ -60,11 +60,13 @@ export const SearchOutputSchema = z.object({
 export const SyntaxInputSchema = z.object({
   framework: z
     .string()
-    .describe("Target library: langchain | llamaindex | ollama"),
+    .describe("Target library: langchain | llamaindex | ollama | xrpl"),
   topic: z
     .string()
     .min(1)
-    .describe("Topic such as agents, rag, chat, tools, streaming, migration"),
+    .describe(
+      "Topic such as agents, rag, chat, tools, payment, wallet, trustlines, channels, rlusd, hooks, migration",
+    ),
 });
 
 export const SyntaxOutputSchema = z.object({
@@ -91,7 +93,7 @@ export const SyntaxOutputSchema = z.object({
 export const DiagnoseInputSchema = z.object({
   framework: z
     .string()
-    .describe("Target library: langchain | llamaindex | ollama"),
+    .describe("Target library: langchain | llamaindex | ollama | xrpl"),
   error_log: z.string().min(1).describe("Stack trace or error message to match"),
 });
 

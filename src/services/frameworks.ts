@@ -12,6 +12,14 @@ const ALIASES: Record<string, FrameworkId> = {
   llama_index: "llamaindex",
   llama: "llamaindex",
   ollama: "ollama",
+  xrpl: "xrpl",
+  "xrpl.js": "xrpl",
+  xrpljs: "xrpl",
+  "xrpl-js": "xrpl",
+  "xrpl-py": "xrpl",
+  xrplpy: "xrpl",
+  ripple: "xrpl",
+  "ripple-lib": "xrpl",
 };
 
 export const FRAMEWORK_META: Record<
@@ -29,6 +37,10 @@ export const FRAMEWORK_META: Record<
   ollama: {
     displayName: "Ollama",
     homepage: "https://docs.ollama.com",
+  },
+  xrpl: {
+    displayName: "XRPL (xrpl.js / xrpl-py)",
+    homepage: "https://js.xrpl.org",
   },
 };
 

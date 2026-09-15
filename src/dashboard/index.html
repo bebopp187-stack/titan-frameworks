@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Titan Frameworks — Admin</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --card: #141a2e;
+        --ink: #e8ecf7;
+        --muted: #93a0c2;
+        --line: #243056;
+        --xrp: #23292f;
+        --gold: #f2c14e;
+        --accent: #6ea8ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, Segoe UI, sans-serif;
+        background: radial-gradient(1200px 500px at 10% -10%, #1b2748, var(--bg));
+        color: var(--ink);
+      }
+      header {
+        padding: 28px 32px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      h1 { font-size: 22px; margin: 0; }
+      .sub { color: var(--muted); font-size: 13px; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        padding: 24px 32px 40px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px 18px 16px;
+      }
+      .card.xrp {
+        background: linear-gradient(180deg, #2a2416, var(--xrp));
+        border-color: #5a4a22;
+      }
+      .label { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .value { font-size: 32px; font-weight: 700; margin-top: 10px; }
+      .card.xrp .value { color: var(--gold); }
+      .hint { margin-top: 8px; color: var(--muted); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Titan Frameworks Admin</h1>
+        <div class="sub">Query stats, docs index, and XRPL settlements</div>
+      </div>
+      <div class="sub" id="updated">loading…</div>
+    </header>
+    <section class="grid" id="cards"></section>
+    <script>
+      async function load() {
+        const s = await fetch("/admin/api/stats").then((r) => r.json());
+        document.getElementById("updated").textContent = s.updatedAt || "";
+        const cards = [
+          { label: "Indexed chunks", value: s.chunks, hint: (s.frameworks || []).join(" · ") },
+          { label: "MCP calls", value: s.mcpCalls, hint: "HTTP /mcp invocations" },
+          { label: "Settlements", value: s.settlements, hint: "x402 receipts (USDC + XRPL)" },
+          { label: "Total XRP Earned", value: s.totalXrpEarned, hint: s.xrpDropsEarned + " drops", xrp: true },
+        ];
+        document.getElementById("cards").innerHTML = cards
+          .map(
+            (c) =>
+              `<article class="card${c.xrp ? " xrp" : ""}"><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="hint">${c.hint || ""}</div></article>`,
+          )
+          .join("");
+      }
+      load().catch((err) => {
+        document.getElementById("updated").textContent = String(err);
+      });
+    </script>
+  </body>
+</html>

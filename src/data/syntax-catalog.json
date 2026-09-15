@@ -252,5 +252,104 @@
     "relatedDocs": [
       { "title": "Embeddings API", "url": "https://github.com/ollama/ollama/blob/main/docs/api.md" }
     ]
+  },
+  {
+    "id": "xrpl-client",
+    "framework": "xrpl",
+    "topics": ["client", "connect", "websocket", "rpc", "install"],
+    "versionNote": "xrpl.js 4.x — WebSocket Client. ripple-lib is retired.",
+    "imports": [
+      "import { Client, Wallet, xrpToDrops, dropsToXrp } from \"xrpl\"",
+      "from xrpl.clients import JsonRpcClient"
+    ],
+    "snippets": [
+      {
+        "title": "Connect and ping",
+        "language": "typescript",
+        "code": "import { Client } from \"xrpl\";\nconst client = new Client(\"wss://s.altnet.rippletest.net:51233\");\nawait client.connect();\nconst info = await client.request({ command: \"server_info\" });\nawait client.disconnect();"
+      },
+      {
+        "title": "xrpl-py client",
+        "language": "python",
+        "code": "from xrpl.clients import JsonRpcClient\nclient = JsonRpcClient(\"https://s.altnet.rippletest.net:51234\")"
+      }
+    ],
+    "migrationNotes": [
+      "ripple-lib / ripple.RippleAPI → `import { Client } from \"xrpl\"`.",
+      "JSON-RPC HTTP still works in xrpl-py; xrpl.js prefers WebSocket."
+    ],
+    "relatedDocs": [
+      { "title": "Client", "url": "https://js.xrpl.org/classes/Client.html" }
+    ]
+  },
+  {
+    "id": "xrpl-wallet-payment",
+    "framework": "xrpl",
+    "topics": ["wallet", "payment", "drops", "transaction"],
+    "versionNote": "Amount for XRP is drops (string). 1 XRP = 1_000_000 drops; 1000 drops = 0.001 XRP.",
+    "imports": [
+      "import { Client, Wallet, xrpToDrops } from \"xrpl\""
+    ],
+    "snippets": [
+      {
+        "title": "Payment in XRP drops",
+        "language": "typescript",
+        "code": "import { Client, Wallet, xrpToDrops } from \"xrpl\";\nconst client = new Client(\"wss://s.altnet.rippletest.net:51233\");\nawait client.connect();\nconst wallet = Wallet.fromSeed(process.env.XRPL_SEED!);\nconst prepared = await client.autofill({\n  TransactionType: \"Payment\",\n  Account: wallet.classicAddress,\n  Destination: \"rPayee...\",\n  Amount: xrpToDrops(\"0.001\"), // \"1000\" drops\n  SourceTag: 804681468,\n});\nconst result = await client.submitAndWait(prepared, { wallet });"
+      },
+      {
+        "title": "xrpl-py Payment",
+        "language": "python",
+        "code": "from xrpl.models.transactions import Payment\nfrom xrpl.utils import xrp_to_drops\nfrom xrpl.transaction import submit_and_wait\ntx = Payment(account=wallet.address, destination=dest, amount=xrp_to_drops(\"0.001\"))\nsubmit_and_wait(tx, client, wallet)"
+      }
+    ],
+    "migrationNotes": [
+      "Do not pass XRP as a number or as {currency:\"XRP\"}. Use a drops string.",
+      "submit() is fire-and-forget; submitAndWait() waits for validated."
+    ],
+    "relatedDocs": [
+      { "title": "Payment", "url": "https://xrpl.org/docs/references/protocol/transactions/types/payment" }
+    ]
+  },
+  {
+    "id": "xrpl-trust-rlusd",
+    "framework": "xrpl",
+    "topics": ["trustlines", "rlusd", "iou", "issued", "tokens"],
+    "versionNote": "RLUSD is an issued currency. TrustSet first; Payment Amount is { currency, issuer, value }.",
+    "imports": ["import { Client, Wallet } from \"xrpl\""],
+    "snippets": [
+      {
+        "title": "TrustSet + RLUSD Payment",
+        "language": "typescript",
+        "code": "const RLUSD = \"524C555344000000000000000000000000000000\";\nconst issuer = \"rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De\";\nconst trust = await client.autofill({\n  TransactionType: \"TrustSet\",\n  Account: wallet.classicAddress,\n  LimitAmount: { currency: RLUSD, issuer, value: \"1000\" },\n});\nawait client.submitAndWait(trust, { wallet });\nconst pay = await client.autofill({\n  TransactionType: \"Payment\",\n  Account: wallet.classicAddress,\n  Destination: \"rPayee...\",\n  Amount: { currency: RLUSD, issuer, value: \"0.001\" },\n});\nawait client.submitAndWait(pay, { wallet });"
+      }
+    ],
+    "migrationNotes": [
+      "UTF-8 \"RLUSD\" must be encoded to 40-hex for protocol fields unless a helper opts in.",
+      "Destination must have a matching trust line (or rippling) to receive RLUSD."
+    ],
+    "relatedDocs": [
+      { "title": "Fungible tokens", "url": "https://xrpl.org/docs/concepts/tokens/fungible-tokens" }
+    ]
+  },
+  {
+    "id": "xrpl-channels",
+    "framework": "xrpl",
+    "topics": ["channels", "payment channels", "micropayment"],
+    "versionNote": "Payment channels for high-frequency claims; settle on-ledger with PaymentChannelClaim.",
+    "imports": ["import { Client, Wallet, xrpToDrops } from \"xrpl\""],
+    "snippets": [
+      {
+        "title": "PaymentChannelCreate",
+        "language": "typescript",
+        "code": "const tx = await client.autofill({\n  TransactionType: \"PaymentChannelCreate\",\n  Account: wallet.classicAddress,\n  Destination: \"rPayee...\",\n  Amount: xrpToDrops(\"1\"),\n  SettleDelay: 60,\n  PublicKey: wallet.publicKey,\n});\nawait client.submitAndWait(tx, { wallet });"
+      }
+    ],
+    "migrationNotes": [
+      "Channel claims need the channel ID from the Create metadata.",
+      "x402 micro-payments on XRPL typically use presigned Payment blobs, not channels, unless you opt into a channel facilitator."
+    ],
+    "relatedDocs": [
+      { "title": "Payment Channels", "url": "https://xrpl.org/docs/concepts/payment-types/payment-channels" }
+    ]
   }
 ]

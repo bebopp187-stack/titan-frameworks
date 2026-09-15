@@ -2,7 +2,7 @@
 
 > Live, token-efficient documentation tools for fast-evolving AI frameworks.
 
-Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`) after a $0.001 USDC x402 payment on Base when billing is enabled.
+Titan Frameworks is a Model Context Protocol server. Agents call tools over stdio (Cursor/Claude Desktop) or Streamable HTTP (`POST /mcp`) after a $0.001 USDC x402 payment on Base **or** 1000 drops XRP / RLUSD on the XRP Ledger when billing is enabled.
 
 ## Endpoints
 
@@ -11,18 +11,19 @@ Titan Frameworks is a Model Context Protocol server. Agents call tools over stdi
 | GET | `/health` | free | none |
 | GET | `/llms.txt` | free | none |
 | GET | `/tools` | free | none |
-| POST/GET/DELETE | `/mcp` | $0.001 USDC on Base (`eip155:8453`) when `X402_ENABLED=true` | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` |
+| POST/GET/DELETE | `/mcp` | $0.001 USDC on Base (`eip155:8453`) **or** 1000 drops XRP / RLUSD (`xrpl:0` mainnet, `xrpl:1` testnet) when `X402_ENABLED=true` | x402 `PAYMENT-SIGNATURE` / `X-PAYMENT` / `X-Payment-Signature` |
+| GET | `/admin` | free | none |
 
 Local stdio mode (`npx tsx src/index.ts`) does not charge.
 
 ## Pricing
 
-- **Tool calls over HTTP `/mcp`:** `0.001` USDC (6 decimals → `maxAmountRequired: "1000"`)
-- **Network:** Base mainnet (`eip155:8453`)
-- **Asset:** USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
+- **Tool calls over HTTP `/mcp`:** `0.001` USDC (6 decimals → `maxAmountRequired: "1000"`) **or** `1000` drops XRP (`0.001` XRP) / RLUSD
+- **Networks:** Base mainnet (`eip155:8453`) and XRPL (`xrpl:0` / `xrpl:1`)
+- **Assets:** USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, native `XRP`, RLUSD (`524C555344…` + issuer)
 - **Scheme:** `exact` (x402)
-- **Mock billing:** set `X402_ENABLED=true`. Missing payment headers return HTTP 402 with machine-readable `accepts[]`.
-- **Live billing:** uncomment `@x402/express` wiring in `src/services/x402.ts` and set `X402_PAY_TO`.
+- **Mock billing:** set `X402_ENABLED=true`. Missing payment headers return HTTP 402 with machine-readable `accepts[]` (Base + XRPL channels).
+- **Live XRPL verify:** `X402_XRPL_LIVE=true` plus `XRPL_FACILITATOR_URL` (default `https://xrpl-facilitator-testnet.t54.ai`).
 
 ## Tools (JSON Schema)
 
@@ -37,7 +38,7 @@ Search locally indexed Markdown for a framework. Returns compact chunks.
     "type": "object",
     "required": ["framework", "query"],
     "properties": {
-      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama"] },
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] },
       "query": { "type": "string" }
     }
   },
@@ -74,7 +75,7 @@ Working snippets, imports, and migration notes for the latest documented version
     "type": "object",
     "required": ["framework", "topic"],
     "properties": {
-      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama"] },
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] },
       "topic": { "type": "string", "description": "agents | rag | chat | tools | streaming | migration | embeddings" }
     }
   }
@@ -92,7 +93,7 @@ Match a stack trace against known deprecated APIs and return an exact fix.
     "type": "object",
     "required": ["framework", "error_log"],
     "properties": {
-      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama"] },
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] },
       "error_log": { "type": "string" }
     }
   }
@@ -104,6 +105,7 @@ Match a stack trace against known deprecated APIs and return an exact fix.
 - LangChain (`langchain`) — Python/JS LCEL, agents, LangGraph notes
 - LlamaIndex (`llamaindex`) — indexes, Settings, query/chat engines
 - Ollama (`ollama`) — CLI, REST `/api/chat`, Python/JS SDK
+- XRPL (`xrpl`) — xrpl.js / xrpl-py Client, Wallet, Payments, channels, trustlines, RLUSD, Hooks notes
 
 Refresh: `npm run index-docs`
 

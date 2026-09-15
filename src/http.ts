@@ -3,9 +3,10 @@ import path from "node:path";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createTitanServer, SERVER_INFO } from "./server.js";
-import { attachX402, paymentRequiredBody, x402MockMiddleware } from "./services/x402.js";
+import { attachX402, paymentRequiredBody, x402MockMiddleware, xrplNetwork, xrplPriceDrops } from "./services/x402.js";
 import { projectRoot } from "./services/frameworks.js";
 import { loadDocsIndex } from "./services/docs-store.js";
+import { getEarnings, recordMcpCall, xrpEarned } from "./services/earnings.js";
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -13,7 +14,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Accept, MCP-Protocol-Version, Mcp-Session-Id, Authorization, X-PAYMENT, PAYMENT-SIGNATURE",
+    "Content-Type, Accept, MCP-Protocol-Version, Mcp-Session-Id, Authorization, X-PAYMENT, PAYMENT-SIGNATURE, X-Payment-Signature",
   );
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   if (req.method === "OPTIONS") {
@@ -48,11 +49,34 @@ app.get("/tools", (_req, res) => {
       "fetch_latest_syntax",
       "diagnose_framework_error",
     ],
+    frameworks: ["langchain", "llamaindex", "ollama", "xrpl"],
     pricing: {
-      httpMcp: "$0.001 USDC",
-      network: "eip155:8453",
+      httpMcp: "$0.001 USDC or 1000 drops XRP / RLUSD",
+      networks: ["eip155:8453", xrplNetwork()],
+      xrpDrops: xrplPriceDrops(),
       enabled: process.env.X402_ENABLED === "true",
     },
+  });
+});
+
+app.get("/admin", (_req, res) => {
+  const file = path.join(projectRoot(), "src", "dashboard", "index.html");
+  res.type("html").send(readFileSync(file, "utf8"));
+});
+
+app.get("/admin/api/stats", (_req, res) => {
+  const index = loadDocsIndex();
+  const earnings = getEarnings();
+  res.json({
+    chunks: index.chunks.length,
+    frameworks: Object.keys(index.frameworks ?? {}),
+    mcpCalls: earnings.mcpCalls,
+    settlements: earnings.settlements,
+    xrpDropsEarned: earnings.xrpDropsEarned,
+    totalXrpEarned: xrpEarned().toFixed(6),
+    rlusdEarned: earnings.rlusdEarned,
+    updatedAt: earnings.updatedAt,
+    lastSettlement: earnings.lastSettlement ?? null,
   });
 });
 
@@ -72,7 +96,7 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
       {
         name: "search_ai_framework_docs",
         description:
-          "Keyword search over locally indexed Markdown for langchain, llamaindex, or ollama.",
+          "Keyword search over locally indexed Markdown for langchain, llamaindex, ollama, or xrpl.",
         inputSchema: {
           type: "object",
           required: ["framework", "query"],
@@ -113,6 +137,7 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
 });
 
 app.all("/mcp", x402MockMiddleware, async (req, res) => {
+  recordMcpCall();
   const server = createTitanServer();
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,

@@ -10,7 +10,7 @@ export function registerFetchSyntaxTool(server: McpServer): void {
     {
       title: "Fetch Latest Syntax",
       description:
-        "Return working imports, code snippets, and migration notes for a framework topic (agents, rag, chat, tools, ...).",
+        "Return working imports, code snippets, and migration notes for a framework topic (agents, rag, wallet, payment, trustlines, ...).",
       inputSchema: SyntaxInputSchema,
       outputSchema: SyntaxOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },

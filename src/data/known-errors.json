@@ -153,5 +153,50 @@
     "reason": "Ollama's OpenAI-compatible endpoint serves local tags, not OpenAI model names.",
     "fix": "Set openai.base_url to http://localhost:11434/v1 and model to a pulled tag such as llama3.2.",
     "snippet": "from openai import OpenAI\nclient = OpenAI(base_url=\"http://localhost:11434/v1\", api_key=\"ollama\")\nclient.chat.completions.create(model=\"llama3.2\", messages=[{\"role\":\"user\",\"content\":\"hi\"}])"
+  },
+  {
+    "id": "xrpl-ripple-lib",
+    "framework": "xrpl",
+    "deprecated": "ripple-lib / RippleAPI",
+    "replacement": "import { Client, Wallet } from \"xrpl\"",
+    "patterns": [
+      "ripple-lib",
+      "RippleAPI",
+      "require(\"ripple-lib\")",
+      "Cannot find module 'ripple-lib'"
+    ],
+    "reason": "ripple-lib is unmaintained. The supported JS SDK is xrpl.js.",
+    "fix": "npm install xrpl and replace RippleAPI.connect with new Client(wsUrl); await client.connect().",
+    "snippet": "import { Client } from \"xrpl\";\nconst client = new Client(\"wss://xrplcluster.com\");\nawait client.connect();"
+  },
+  {
+    "id": "xrpl-amount-number",
+    "framework": "xrpl",
+    "deprecated": "Amount as a JS number (or XRP object)",
+    "replacement": "xrpToDrops(\"0.001\") string, or IOU { currency, issuer, value }",
+    "patterns": [
+      "temBAD_AMOUNT",
+      "Amount must be",
+      "drops",
+      "XRP as number"
+    ],
+    "reason": "Protocol XRP amounts are integer drops encoded as strings. JS numbers lose precision and are rejected.",
+    "fix": "Use xrpToDrops for native XRP. Use { currency, issuer, value } for RLUSD/IOUs.",
+    "snippet": "import { xrpToDrops } from \"xrpl\";\nAmount: xrpToDrops(\"0.001\")"
+  },
+  {
+    "id": "xrpl-xaddress",
+    "framework": "xrpl",
+    "deprecated": "X-address where a classic r-address is required",
+    "replacement": "wallet.classicAddress (r...)",
+    "patterns": [
+      "actMalformed",
+      "X-address",
+      "classicAddress",
+      "invalid account"
+    ],
+    "reason": "Most RPC commands and tx Account/Destination fields expect classic addresses.",
+    "fix": "Pass wallet.classicAddress, not wallet.getXAddress().",
+    "snippet": "Destination: wallet.classicAddress"
   }
 ]

@@ -8,3 +8,4 @@ coverage/
 .railway
 src/data/docs-index.sqlite
 src/data/*.sqlite-*
+src/data/earnings.json
