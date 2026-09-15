@@ -1,0 +1,172 @@
+[
+  {
+    "framework": "langchain",
+    "aliases": ["ChatOpenAI", "chatopenai", "langchain.chat_models.ChatOpenAI"],
+    "symbol": "ChatOpenAI",
+    "package": "langchain-openai",
+    "install": "pip install langchain-openai",
+    "importLine": "from langchain_openai import ChatOpenAI",
+    "call": "ChatOpenAI(model=\"gpt-4.1-mini\")",
+    "note": "Do not import ChatOpenAI from langchain.chat_models. Prefer init_chat_model(\"openai:gpt-4.1-mini\") when the provider should stay swappable."
+  },
+  {
+    "framework": "langchain",
+    "aliases": ["init_chat_model", "initChatModel"],
+    "symbol": "init_chat_model",
+    "package": "langchain",
+    "install": "pip install langchain langchain-openai",
+    "importLine": "from langchain.chat_models import init_chat_model",
+    "call": "init_chat_model(\"openai:gpt-4.1-mini\")",
+    "note": "Stable provider-agnostic entry. JS: ChatOpenAI from @langchain/openai."
+  },
+  {
+    "framework": "langchain",
+    "aliases": ["LLMChain", "ConversationChain", "SimpleSequentialChain"],
+    "symbol": "LCEL pipe",
+    "package": "langchain-core",
+    "install": "pip install langchain-core langchain-openai",
+    "importLine": "from langchain_core.prompts import ChatPromptTemplate",
+    "call": "chain = prompt | model | StrOutputParser()",
+    "note": "Classic chains are gone. Compose Runnables with | ."
+  },
+  {
+    "framework": "langchain",
+    "aliases": ["initialize_agent", "AgentType", "AgentExecutor", "ZERO_SHOT_REACT_DESCRIPTION"],
+    "symbol": "create_agent",
+    "package": "langchain",
+    "install": "pip install langchain langgraph",
+    "importLine": "from langchain.agents import create_agent",
+    "call": "create_agent(model, tools=[...])",
+    "note": "Invoke with {\"messages\": [{\"role\":\"user\",\"content\":\"...\"}]}. LangGraph equivalent: create_react_agent."
+  },
+  {
+    "framework": "langchain",
+    "aliases": ["RetrievalQA", "ConversationalRetrievalChain"],
+    "symbol": "create_retrieval_chain",
+    "package": "langchain",
+    "install": "pip install langchain langchain-openai",
+    "importLine": "from langchain.chains import create_retrieval_chain",
+    "call": "create_retrieval_chain(retriever, combine_docs_chain)",
+    "note": "Pair with create_stuff_documents_chain(model, prompt)."
+  },
+  {
+    "framework": "langchain",
+    "aliases": ["@tool", "tool decorator", "StructuredTool"],
+    "symbol": "tool",
+    "package": "langchain-core",
+    "install": "pip install langchain-core",
+    "importLine": "from langchain_core.tools import tool",
+    "call": "@tool\ndef multiply(a: float, b: float) -> float:\n    return a * b",
+    "note": "Pass the decorated function in create_agent(..., tools=[multiply])."
+  },
+  {
+    "framework": "llamaindex",
+    "aliases": ["GPTSimpleVectorIndex", "GPTVectorStoreIndex", "GPTListIndex", "VectorStoreIndex"],
+    "symbol": "VectorStoreIndex",
+    "package": "llama-index-core",
+    "install": "pip install llama-index",
+    "importLine": "from llama_index.core import VectorStoreIndex",
+    "call": "VectorStoreIndex.from_documents(docs)",
+    "note": "GPT* index names were renamed. Import from llama_index.core, not llama_index."
+  },
+  {
+    "framework": "llamaindex",
+    "aliases": ["ServiceContext", "LLMPredictor", "service_context"],
+    "symbol": "Settings",
+    "package": "llama-index-core",
+    "install": "pip install llama-index",
+    "importLine": "from llama_index.core import Settings",
+    "call": "Settings.llm = OpenAI(model=\"gpt-4.1-mini\")",
+    "note": "Do not pass service_context= into indexes."
+  },
+  {
+    "framework": "llamaindex",
+    "aliases": ["OpenAIAgent", "FunctionAgent", "ReActAgent"],
+    "symbol": "FunctionAgent",
+    "package": "llama-index-core",
+    "install": "pip install llama-index",
+    "importLine": "from llama_index.core.agent.workflow import FunctionAgent",
+    "call": "FunctionAgent(tools=[...], llm=OpenAI(model=\"gpt-4.1-mini\"))",
+    "note": "Old llama_index.agent constructors moved under core.agent.workflow."
+  },
+  {
+    "framework": "llamaindex",
+    "aliases": ["Ollama", "llama_index.llms.ollama"],
+    "symbol": "Ollama",
+    "package": "llama-index-llms-ollama",
+    "install": "pip install llama-index-llms-ollama llama-index-embeddings-ollama",
+    "importLine": "from llama_index.llms.ollama import Ollama",
+    "call": "Ollama(model=\"llama3.2\", request_timeout=120.0)",
+    "note": "Pull the tag first: ollama pull llama3.2."
+  },
+  {
+    "framework": "ollama",
+    "aliases": ["ollama.generate", "/api/generate", "generate"],
+    "symbol": "ollama.chat",
+    "package": "ollama",
+    "install": "pip install ollama",
+    "importLine": "import ollama",
+    "call": "ollama.chat(model=\"llama3.2\", messages=[{\"role\":\"user\",\"content\":\"hi\"}])",
+    "note": "/api/generate is one-shot prompt completion. Multi-turn uses /api/chat."
+  },
+  {
+    "framework": "ollama",
+    "aliases": ["llama2", "llama2:latest"],
+    "symbol": "llama3.2",
+    "package": "ollama",
+    "install": "ollama pull llama3.2",
+    "importLine": "import ollama",
+    "call": "ollama.chat(model=\"llama3.2\", messages=[{\"role\":\"user\",\"content\":\"hi\"}])",
+    "note": "llama2 is not the default tag anymore. Confirm with `ollama list`."
+  },
+  {
+    "framework": "ollama",
+    "aliases": ["gpt-4", "gpt-3.5-turbo", "11434/v1"],
+    "symbol": "OpenAI-compatible Ollama",
+    "package": "openai",
+    "install": "pip install openai && ollama pull llama3.2",
+    "importLine": "from openai import OpenAI",
+    "call": "OpenAI(base_url=\"http://localhost:11434/v1\", api_key=\"ollama\")",
+    "note": "Use a pulled local tag as model=, never gpt-4."
+  },
+  {
+    "framework": "xrpl",
+    "aliases": ["ripple-lib", "RippleAPI", "ripple"],
+    "symbol": "Client",
+    "package": "xrpl",
+    "install": "npm install xrpl",
+    "importLine": "import { Client, Wallet } from \"xrpl\"",
+    "call": "const client = new Client(\"wss://xrplcluster.com\")",
+    "note": "ripple-lib is unmaintained. Python: xrpl-py JsonRpcClient."
+  },
+  {
+    "framework": "xrpl",
+    "aliases": ["xrpToDrops", "drops", "Amount"],
+    "symbol": "xrpToDrops",
+    "package": "xrpl",
+    "install": "npm install xrpl",
+    "importLine": "import { xrpToDrops } from \"xrpl\"",
+    "call": "Amount: xrpToDrops(\"0.001\")",
+    "note": "XRP amounts are drop strings. Never pass a JS number. IOUs use { currency, issuer, value }."
+  },
+  {
+    "framework": "xrpl",
+    "aliases": ["classicAddress", "getXAddress", "X-address"],
+    "symbol": "classicAddress",
+    "package": "xrpl",
+    "install": "npm install xrpl",
+    "importLine": "import { Wallet } from \"xrpl\"",
+    "call": "Destination: wallet.classicAddress",
+    "note": "Account and Destination fields want classic r-addresses."
+  },
+  {
+    "framework": "xrpl",
+    "aliases": ["RLUSD", "TrustSet", "issued currency"],
+    "symbol": "TrustSet",
+    "package": "xrpl",
+    "install": "npm install xrpl",
+    "importLine": "import { Client, Wallet } from \"xrpl\"",
+    "call": "TransactionType: \"TrustSet\"",
+    "note": "TrustSet before sending RLUSD. Currency is 40-hex 524C555344… issuer rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De on mainnet."
+  }
+]

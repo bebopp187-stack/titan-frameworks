@@ -12,8 +12,13 @@ Agent discovery: [`llms.txt`](https://titan-frameworks-production.up.railway.app
 | Tool | Purpose |
 | --- | --- |
 | `search_ai_framework_docs` | Keyword search over local Markdown. Use for concepts/symbols; not stack traces |
-| `fetch_latest_syntax` | Working snippets and migration notes for one topic. Use when writing code |
+| `fetch_latest_syntax` | Working snippets and migration notes for one topic. Use when writing a fragment |
 | `diagnose_framework_error` | Stack-trace → deprecated API → exact fix. Use only when you have an error |
+| `review_framework_code` | Lint a snippet for dead APIs before it crashes. Returns hunks, does not execute |
+| `rewrite_framework_code` | Apply conservative catalog rewrites; leftover lists unsafe call sites |
+| `resolve_symbol` | Package, install, import, and call shape for one API name |
+| `working_example` | Complete runnable file for a goal (agent, rag, payment, …) |
+| `xrpl_intent_tx` | Typed XRPL tx skeleton. Never submits or moves funds |
 
 ## Connect a client
 
@@ -102,7 +107,7 @@ src/tools/         MCP tool handlers
 src/mcp/tools.ts   tool registration (includes xrpl)
 src/indexer/       xrpl.js crawl targets
 src/services/      search, indexer, store, x402, earnings, discovery
-src/data/          JSON index, syntax catalog, known errors
+src/data/          JSON index, syntax catalog, known errors, symbol map, examples, XRPL intents
 src/types/         Zod schemas + TS types
 scripts/           index-docs, x402-smoke
 server.json        MCP Registry remote listing

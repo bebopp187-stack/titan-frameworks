@@ -12,6 +12,17 @@
       "Chain.run",
       "predict_and_parse"
     ],
+    "codePatterns": ["LLMChain", "ConversationChain", "SimpleSequentialChain", "predict_and_parse"],
+    "rewrites": [
+      {
+        "from": "from langchain.chains import LLMChain",
+        "to": "from langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser"
+      },
+      {
+        "from": "from langchain.chains import ConversationChain",
+        "to": "from langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser"
+      }
+    ],
     "reason": "Classic chains are deprecated. LangChain now composes runnables (LCEL) or agents.",
     "fix": "Replace LLMChain(llm=llm, prompt=prompt) with chain = prompt | llm | StrOutputParser(), then chain.invoke({...}).",
     "snippet": "from langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\nfrom langchain_openai import ChatOpenAI\n\nprompt = ChatPromptTemplate.from_template(\"Answer: {q}\")\nchain = prompt | ChatOpenAI(model=\"gpt-4.1-mini\") | StrOutputParser()\nprint(chain.invoke({\"q\": \"hi\"}))"
@@ -27,6 +38,14 @@
       "ZERO_SHOT_REACT",
       "CHAT_CONVERSATIONAL_REACT",
       "load_tools("
+    ],
+    "codePatterns": ["initialize_agent", "AgentType", "ZERO_SHOT_REACT_DESCRIPTION", "AgentExecutor"],
+    "rewrites": [
+      {
+        "from": "from langchain.agents import initialize_agent",
+        "to": "from langchain.agents import create_agent"
+      },
+      { "from": "initialize_agent", "to": "create_agent" }
     ],
     "reason": "initialize_agent is removed from modern LangChain. Use the new agent API or LangGraph.",
     "fix": "Use create_agent(model, tools) or create_react_agent(model, tools) and invoke with {\"messages\":[...]} .",
@@ -44,6 +63,17 @@
       "ChatOpenAI is not available",
       "ModuleNotFoundError: No module named 'langchain.chat_models'"
     ],
+    "codePatterns": ["langchain.chat_models", "langchain.llms", "from langchain.llms import OpenAI"],
+    "rewrites": [
+      {
+        "from": "from langchain.chat_models import ChatOpenAI",
+        "to": "from langchain_openai import ChatOpenAI"
+      },
+      {
+        "from": "from langchain.llms import OpenAI",
+        "to": "from langchain.chat_models import init_chat_model"
+      }
+    ],
     "reason": "Partner integrations moved to dedicated packages (langchain-openai, langchain-anthropic, ...).",
     "fix": "pip install langchain-openai and import ChatOpenAI from langchain_openai, or use init_chat_model(\"openai:gpt-4.1-mini\").",
     "snippet": "from langchain.chat_models import init_chat_model\nmodel = init_chat_model(\"openai:gpt-4.1-mini\")"
@@ -59,6 +89,13 @@
       "from_chain_type",
       "chain_type=\"stuff\""
     ],
+    "codePatterns": ["RetrievalQA", "ConversationalRetrievalChain"],
+    "rewrites": [
+      {
+        "from": "from langchain.chains import RetrievalQA",
+        "to": "from langchain.chains import create_retrieval_chain\nfrom langchain.chains.combine_documents import create_stuff_documents_chain"
+      }
+    ],
     "reason": "RetrievalQA wrappers hide LCEL and break streaming/tool-calling.",
     "fix": "retriever = vectorstore.as_retriever(); build prompt | model; use create_retrieval_chain(retriever, combine_docs_chain).",
     "snippet": "from langchain.chains.combine_documents import create_stuff_documents_chain\nfrom langchain.chains import create_retrieval_chain\ncombine = create_stuff_documents_chain(model, prompt)\nrag = create_retrieval_chain(retriever, combine)\nrag.invoke({\"input\": \"What is LCEL?\"})"
@@ -73,6 +110,12 @@
       "GPTVectorStoreIndex",
       "GPTListIndex",
       "cannot import name 'GPTSimpleVectorIndex'"
+    ],
+    "codePatterns": ["GPTSimpleVectorIndex", "GPTVectorStoreIndex", "GPTListIndex"],
+    "rewrites": [
+      { "from": "GPTSimpleVectorIndex", "to": "VectorStoreIndex" },
+      { "from": "GPTVectorStoreIndex", "to": "VectorStoreIndex" },
+      { "from": "GPTListIndex", "to": "VectorStoreIndex" }
     ],
     "reason": "GPT* index names were renamed. Use VectorStoreIndex (and other Index classes) from llama_index.core.",
     "fix": "from llama_index.core import VectorStoreIndex, SimpleDirectoryReader; index = VectorStoreIndex.from_documents(docs)",
@@ -90,6 +133,17 @@
       "service_context=",
       "cannot import name 'ServiceContext'"
     ],
+    "codePatterns": ["ServiceContext", "LLMPredictor", "service_context="],
+    "rewrites": [
+      {
+        "from": "from llama_index import ServiceContext",
+        "to": "from llama_index.core import Settings"
+      },
+      {
+        "from": "from llama_index.core import ServiceContext",
+        "to": "from llama_index.core import Settings"
+      }
+    ],
     "reason": "ServiceContext is removed. Global/runtime configuration lives on Settings.",
     "fix": "Set Settings.llm and Settings.embed_model once; do not pass service_context= into indexes.",
     "snippet": "from llama_index.core import Settings\nfrom llama_index.llms.openai import OpenAI\nfrom llama_index.embeddings.openai import OpenAIEmbedding\nSettings.llm = OpenAI(model=\"gpt-4.1-mini\")\nSettings.embed_model = OpenAIEmbedding(model=\"text-embedding-3-small\")"
@@ -104,6 +158,10 @@
       "ModuleNotFoundError: No module named 'llama_index.llms'",
       "No module named 'llama_index.readers'",
       "cannot import name 'Document' from 'llama_index'"
+    ],
+    "codePatterns": ["from llama_index import"],
+    "rewrites": [
+      { "from": "from llama_index import", "to": "from llama_index.core import" }
     ],
     "reason": "The monolith package split: core + llama-index-llms-* + llama-index-embeddings-* + readers.",
     "fix": "pip install llama-index llama-index-llms-openai llama-index-embeddings-openai. Import Document, VectorStoreIndex from llama_index.core.",
@@ -120,6 +178,10 @@
       "invalid generate request",
       "ollama.generate("
     ],
+    "codePatterns": ["ollama.generate", "/api/generate"],
+    "rewrites": [
+      { "from": "ollama.generate(", "to": "ollama.chat(" }
+    ],
     "reason": "Multi-turn chat belongs on /api/chat. /api/generate is a single prompt completion API.",
     "fix": "Use POST /api/chat with { model, messages: [{role, content}] } or client.chat(model=..., messages=...).",
     "snippet": "import ollama\nr = ollama.chat(model=\"llama3.2\", messages=[{\"role\": \"user\", \"content\": \"hi\"}])\nprint(r[\"message\"][\"content\"])"
@@ -134,6 +196,13 @@
       "model 'llama2' not found",
       "pull model manifest: file does not exist",
       "Error: model 'llama2' not found"
+    ],
+    "codePatterns": ["llama2:latest", "model=\"llama2\"", "model: \"llama2\"", "model='llama2'"],
+    "rewrites": [
+      { "from": "llama2:latest", "to": "llama3.2" },
+      { "from": "model=\"llama2\"", "to": "model=\"llama3.2\"" },
+      { "from": "model: \"llama2\"", "to": "model: \"llama3.2\"" },
+      { "from": "model='llama2'", "to": "model='llama3.2'" }
     ],
     "reason": "llama2 is no longer the recommended default and may not be pulled.",
     "fix": "ollama pull llama3.2  then pass model=\"llama3.2\". List local tags with `ollama list`.",
@@ -150,6 +219,12 @@
       "Invalid model",
       "11434/v1"
     ],
+    "codePatterns": ["gpt-3.5-turbo", "model=\"gpt-4\"", "model: \"gpt-4\""],
+    "rewrites": [
+      { "from": "gpt-3.5-turbo", "to": "llama3.2" },
+      { "from": "model=\"gpt-4\"", "to": "model=\"llama3.2\"" },
+      { "from": "model: \"gpt-4\"", "to": "model: \"llama3.2\"" }
+    ],
     "reason": "Ollama's OpenAI-compatible endpoint serves local tags, not OpenAI model names.",
     "fix": "Set openai.base_url to http://localhost:11434/v1 and model to a pulled tag such as llama3.2.",
     "snippet": "from openai import OpenAI\nclient = OpenAI(base_url=\"http://localhost:11434/v1\", api_key=\"ollama\")\nclient.chat.completions.create(model=\"llama3.2\", messages=[{\"role\":\"user\",\"content\":\"hi\"}])"
@@ -164,6 +239,12 @@
       "RippleAPI",
       "require(\"ripple-lib\")",
       "Cannot find module 'ripple-lib'"
+    ],
+    "codePatterns": ["ripple-lib", "RippleAPI"],
+    "rewrites": [
+      { "from": "require(\"ripple-lib\")", "to": "require(\"xrpl\")" },
+      { "from": "from \"ripple-lib\"", "to": "from \"xrpl\"" },
+      { "from": "RippleAPI", "to": "Client" }
     ],
     "reason": "ripple-lib is unmaintained. The supported JS SDK is xrpl.js.",
     "fix": "npm install xrpl and replace RippleAPI.connect with new Client(wsUrl); await client.connect().",
@@ -180,6 +261,8 @@
       "drops",
       "XRP as number"
     ],
+    "codePatterns": ["temBAD_AMOUNT"],
+    "rewrites": [],
     "reason": "Protocol XRP amounts are integer drops encoded as strings. JS numbers lose precision and are rejected.",
     "fix": "Use xrpToDrops for native XRP. Use { currency, issuer, value } for RLUSD/IOUs.",
     "snippet": "import { xrpToDrops } from \"xrpl\";\nAmount: xrpToDrops(\"0.001\")"
@@ -194,6 +277,10 @@
       "X-address",
       "classicAddress",
       "invalid account"
+    ],
+    "codePatterns": ["getXAddress", "XAddress"],
+    "rewrites": [
+      { "from": "wallet.getXAddress()", "to": "wallet.classicAddress" }
     ],
     "reason": "Most RPC commands and tx Account/Destination fields expect classic addresses.",
     "fix": "Pass wallet.classicAddress, not wallet.getXAddress().",

@@ -3,7 +3,12 @@
 import {
   DIAGNOSE_ERROR_DESCRIPTION,
   FETCH_SYNTAX_DESCRIPTION,
+  RESOLVE_SYMBOL_DESCRIPTION,
+  REVIEW_CODE_DESCRIPTION,
+  REWRITE_CODE_DESCRIPTION,
   SEARCH_DOCS_DESCRIPTION,
+  WORKING_EXAMPLE_DESCRIPTION,
+  XRPL_INTENT_TX_DESCRIPTION,
 } from "../mcp/tool-copy.js";
 
 export const PRODUCTION_ORIGIN = "https://titan-frameworks-production.up.railway.app";
@@ -60,6 +65,75 @@ const DIAGNOSE_SCHEMA = {
   },
 } as const;
 
+const FRAMEWORK_PROP = {
+  type: "string",
+  enum: [...FRAMEWORKS],
+  description: "One of langchain, llamaindex, ollama, or xrpl — the library the user is coding against",
+} as const;
+
+const REVIEW_SCHEMA = {
+  type: "object",
+  required: ["framework", "code"],
+  properties: {
+    framework: FRAMEWORK_PROP,
+    code: {
+      type: "string",
+      description: "Source to lint before running. Not a stack trace (use diagnose_framework_error)",
+    },
+    filename: {
+      type: "string",
+      description: "Optional path used only in unified-diff headers",
+    },
+  },
+} as const;
+
+const RESOLVE_SCHEMA = {
+  type: "object",
+  required: ["framework", "symbol"],
+  properties: {
+    framework: FRAMEWORK_PROP,
+    symbol: {
+      type: "string",
+      description: "API name or import path, e.g. ChatOpenAI, ServiceContext, RippleAPI",
+    },
+  },
+} as const;
+
+const EXAMPLE_SCHEMA = {
+  type: "object",
+  required: ["framework", "goal"],
+  properties: {
+    framework: FRAMEWORK_PROP,
+    goal: {
+      type: "string",
+      description: "What to build: agent, rag, chat, lcel, payment, rlusd, trustline, …",
+    },
+    language: {
+      type: "string",
+      description: "python or typescript. Omit to take the best match",
+    },
+    runtime: {
+      type: "string",
+      description: "openai, ollama, or xrpl-testnet. Omit to take the best match",
+    },
+  },
+} as const;
+
+const XRPL_INTENT_SCHEMA = {
+  type: "object",
+  required: ["intent"],
+  properties: {
+    intent: {
+      type: "string",
+      description: "payment, trustline, rlusd, or channel — what the transaction should do",
+    },
+    language: {
+      type: "string",
+      description: "typescript (default) or python",
+    },
+  },
+} as const;
+
 export const MCP_PUBLIC_TOOLS = [
   {
     name: "search_ai_framework_docs",
@@ -75,6 +149,31 @@ export const MCP_PUBLIC_TOOLS = [
     name: "diagnose_framework_error",
     description: DIAGNOSE_ERROR_DESCRIPTION,
     inputSchema: DIAGNOSE_SCHEMA,
+  },
+  {
+    name: "review_framework_code",
+    description: REVIEW_CODE_DESCRIPTION,
+    inputSchema: REVIEW_SCHEMA,
+  },
+  {
+    name: "rewrite_framework_code",
+    description: REWRITE_CODE_DESCRIPTION,
+    inputSchema: REVIEW_SCHEMA,
+  },
+  {
+    name: "resolve_symbol",
+    description: RESOLVE_SYMBOL_DESCRIPTION,
+    inputSchema: RESOLVE_SCHEMA,
+  },
+  {
+    name: "working_example",
+    description: WORKING_EXAMPLE_DESCRIPTION,
+    inputSchema: EXAMPLE_SCHEMA,
+  },
+  {
+    name: "xrpl_intent_tx",
+    description: XRPL_INTENT_TX_DESCRIPTION,
+    inputSchema: XRPL_INTENT_SCHEMA,
   },
 ] as const;
 
@@ -232,7 +331,7 @@ export function openApiDocument() {
           operationId: "mcp",
           summary: "Streamable HTTP MCP (x402)",
           description:
-            "JSON-RPC MCP endpoint. initialize, ping, and tools/list are free. tools/call requires $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then runs search_ai_framework_docs, fetch_latest_syntax, or diagnose_framework_error.",
+            "JSON-RPC MCP endpoint. initialize, ping, and tools/list are free. tools/call requires $0.001 USDC on Base or 1000 drops XRP / 0.001 RLUSD, then runs a registered Titan tool (docs search, syntax, diagnose, review, rewrite, resolve_symbol, working_example, or xrpl_intent_tx).",
           "x-payment-info": {
             protocols: ["x402"],
             price: { mode: "fixed", currency: "USD", amount: "0.001" },

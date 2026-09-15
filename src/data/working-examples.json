@@ -1,0 +1,101 @@
+[
+  {
+    "id": "lc-lcel-py",
+    "framework": "langchain",
+    "goals": ["lcel", "chain", "prompt", "compose"],
+    "language": "python",
+    "runtime": "openai",
+    "filename": "lcel_chain.py",
+    "versions": ["langchain>=0.3", "langchain-openai"],
+    "run": "pip install langchain langchain-openai && python lcel_chain.py",
+    "code": "from langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\nfrom langchain.chat_models import init_chat_model\n\nprompt = ChatPromptTemplate.from_messages([\n    (\"system\", \"Be terse.\"),\n    (\"human\", \"{question}\"),\n])\nchain = prompt | init_chat_model(\"openai:gpt-4.1-mini\") | StrOutputParser()\nprint(chain.invoke({\"question\": \"What is a Runnable?\"}))\n"
+  },
+  {
+    "id": "lc-agent-openai-py",
+    "framework": "langchain",
+    "goals": ["agent", "tools", "tool calling", "create_agent"],
+    "language": "python",
+    "runtime": "openai",
+    "filename": "agent_openai.py",
+    "versions": ["langchain>=0.3", "langchain-openai"],
+    "run": "pip install langchain langchain-openai && python agent_openai.py",
+    "code": "from langchain.agents import create_agent\nfrom langchain.chat_models import init_chat_model\nfrom langchain_core.tools import tool\n\n@tool\ndef multiply(a: float, b: float) -> float:\n    \"\"\"Multiply two numbers.\"\"\"\n    return a * b\n\nagent = create_agent(init_chat_model(\"openai:gpt-4.1-mini\"), tools=[multiply])\nprint(agent.invoke({\"messages\": [{\"role\": \"user\", \"content\": \"What is 12 * 7?\"}]}))\n"
+  },
+  {
+    "id": "lc-agent-ollama-py",
+    "framework": "langchain",
+    "goals": ["agent", "tools", "ollama", "local"],
+    "language": "python",
+    "runtime": "ollama",
+    "filename": "agent_ollama.py",
+    "versions": ["langchain>=0.3", "langchain-ollama"],
+    "run": "ollama pull llama3.2 && pip install langchain langchain-ollama && python agent_ollama.py",
+    "code": "from langchain.agents import create_agent\nfrom langchain_ollama import ChatOllama\nfrom langchain_core.tools import tool\n\n@tool\ndef multiply(a: float, b: float) -> float:\n    \"\"\"Multiply two numbers.\"\"\"\n    return a * b\n\nagent = create_agent(ChatOllama(model=\"llama3.2\"), tools=[multiply])\nprint(agent.invoke({\"messages\": [{\"role\": \"user\", \"content\": \"What is 12 * 7?\"}]}))\n"
+  },
+  {
+    "id": "li-rag-openai-py",
+    "framework": "llamaindex",
+    "goals": ["rag", "index", "query", "vector"],
+    "language": "python",
+    "runtime": "openai",
+    "filename": "rag_openai.py",
+    "versions": ["llama-index", "llama-index-llms-openai", "llama-index-embeddings-openai"],
+    "run": "pip install llama-index llama-index-llms-openai llama-index-embeddings-openai && python rag_openai.py",
+    "code": "from llama_index.core import Document, VectorStoreIndex, Settings\nfrom llama_index.llms.openai import OpenAI\nfrom llama_index.embeddings.openai import OpenAIEmbedding\n\nSettings.llm = OpenAI(model=\"gpt-4.1-mini\")\nSettings.embed_model = OpenAIEmbedding(model=\"text-embedding-3-small\")\nindex = VectorStoreIndex.from_documents([\n    Document(text=\"LCEL composes LangChain Runnables with the pipe operator.\"),\n])\nprint(index.as_query_engine().query(\"What is LCEL?\"))\n"
+  },
+  {
+    "id": "li-rag-ollama-py",
+    "framework": "llamaindex",
+    "goals": ["rag", "ollama", "local"],
+    "language": "python",
+    "runtime": "ollama",
+    "filename": "rag_ollama.py",
+    "versions": ["llama-index", "llama-index-llms-ollama", "llama-index-embeddings-ollama"],
+    "run": "ollama pull llama3.2 && ollama pull nomic-embed-text && pip install llama-index llama-index-llms-ollama llama-index-embeddings-ollama && python rag_ollama.py",
+    "code": "from llama_index.core import Document, VectorStoreIndex, Settings\nfrom llama_index.llms.ollama import Ollama\nfrom llama_index.embeddings.ollama import OllamaEmbedding\n\nSettings.llm = Ollama(model=\"llama3.2\", request_timeout=120.0)\nSettings.embed_model = OllamaEmbedding(model_name=\"nomic-embed-text\")\nindex = VectorStoreIndex.from_documents([\n    Document(text=\"Ollama serves local models over HTTP on port 11434.\"),\n])\nprint(index.as_query_engine().query(\"What does Ollama serve?\"))\n"
+  },
+  {
+    "id": "ol-chat-py",
+    "framework": "ollama",
+    "goals": ["chat", "hello", "messages"],
+    "language": "python",
+    "runtime": "ollama",
+    "filename": "chat.py",
+    "versions": ["ollama"],
+    "run": "ollama pull llama3.2 && pip install ollama && python chat.py",
+    "code": "import ollama\n\nr = ollama.chat(\n    model=\"llama3.2\",\n    messages=[{\"role\": \"user\", \"content\": \"Write one sentence about local LLMs.\"}],\n)\nprint(r[\"message\"][\"content\"])\n"
+  },
+  {
+    "id": "ol-chat-ts",
+    "framework": "ollama",
+    "goals": ["chat", "hello", "javascript", "typescript"],
+    "language": "typescript",
+    "runtime": "ollama",
+    "filename": "chat.ts",
+    "versions": ["ollama"],
+    "run": "ollama pull llama3.2 && npm install ollama && npx tsx chat.ts",
+    "code": "import ollama from \"ollama\";\n\nconst r = await ollama.chat({\n  model: \"llama3.2\",\n  messages: [{ role: \"user\", content: \"Write one sentence about local LLMs.\" }],\n});\nconsole.log(r.message.content);\n"
+  },
+  {
+    "id": "xrpl-payment-ts",
+    "framework": "xrpl",
+    "goals": ["payment", "send xrp", "wallet", "drops"],
+    "language": "typescript",
+    "runtime": "xrpl-testnet",
+    "filename": "pay.ts",
+    "versions": ["xrpl"],
+    "run": "npm install xrpl && npx tsx pay.ts",
+    "code": "import { Client, Wallet, xrpToDrops } from \"xrpl\";\n\nconst client = new Client(\"wss://s.altnet.rippletest.net:51233\");\nawait client.connect();\nconst wallet = Wallet.fromSeed(process.env.XRPL_SEED!);\nconst prepared = await client.autofill({\n  TransactionType: \"Payment\",\n  Account: wallet.classicAddress,\n  Destination: process.env.XRPL_DESTINATION!,\n  Amount: xrpToDrops(\"0.001\"),\n});\nconst result = await client.submitAndWait(prepared, { wallet });\nconsole.log(result.result.meta);\nawait client.disconnect();\n"
+  },
+  {
+    "id": "xrpl-rlusd-ts",
+    "framework": "xrpl",
+    "goals": ["rlusd", "trustline", "iou", "trustset"],
+    "language": "typescript",
+    "runtime": "xrpl-testnet",
+    "filename": "rlusd.ts",
+    "versions": ["xrpl"],
+    "run": "npm install xrpl && npx tsx rlusd.ts",
+    "code": "import { Client, Wallet } from \"xrpl\";\n\nconst RLUSD = \"524C555344000000000000000000000000000000\";\nconst issuer = \"rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De\";\nconst client = new Client(\"wss://xrplcluster.com\");\nawait client.connect();\nconst wallet = Wallet.fromSeed(process.env.XRPL_SEED!);\nconst trust = await client.autofill({\n  TransactionType: \"TrustSet\",\n  Account: wallet.classicAddress,\n  LimitAmount: { currency: RLUSD, issuer, value: \"1000\" },\n});\nawait client.submitAndWait(trust, { wallet });\nawait client.disconnect();\n"
+  }
+]

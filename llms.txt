@@ -106,6 +106,100 @@ Match a stack trace against known deprecated APIs. Use only when you have an `er
 }
 ```
 
+### review_framework_code
+
+Lint source against known dead APIs before it crashes. Returns each hit plus a unified-diff hunk. Paid `tools/call`. Does not execute code.
+
+```json
+{
+  "name": "review_framework_code",
+  "input": {
+    "type": "object",
+    "required": ["framework", "code"],
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] },
+      "code": { "type": "string" },
+      "filename": { "type": "string" }
+    }
+  }
+}
+```
+
+### rewrite_framework_code
+
+Apply conservative catalog rewrites (imports/identifiers) and return the patched file plus a full unified diff. Leftover hits are unsafe call-site transforms. Paid `tools/call`. Does not execute code.
+
+```json
+{
+  "name": "rewrite_framework_code",
+  "input": {
+    "type": "object",
+    "required": ["framework", "code"],
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] },
+      "code": { "type": "string" },
+      "filename": { "type": "string" }
+    }
+  }
+}
+```
+
+### resolve_symbol
+
+Map an API name to the current package, install line, import, and call shape. Paid `tools/call`. Catalog-backed.
+
+```json
+{
+  "name": "resolve_symbol",
+  "input": {
+    "type": "object",
+    "required": ["framework", "symbol"],
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] },
+      "symbol": { "type": "string" }
+    }
+  }
+}
+```
+
+### working_example
+
+One complete runnable file for a goal (agent, rag, chat, payment, rlusd). Paid `tools/call`. Does not execute the example.
+
+```json
+{
+  "name": "working_example",
+  "input": {
+    "type": "object",
+    "required": ["framework", "goal"],
+    "properties": {
+      "framework": { "type": "string", "enum": ["langchain", "llamaindex", "ollama", "xrpl"] },
+      "goal": { "type": "string" },
+      "language": { "type": "string" },
+      "runtime": { "type": "string" }
+    }
+  }
+}
+```
+
+### xrpl_intent_tx
+
+Typed xrpl.js / xrpl-py skeleton for payment, trustline, rlusd, or channel. Never submits, signs, or moves funds. Paid `tools/call`.
+
+```json
+{
+  "name": "xrpl_intent_tx",
+  "input": {
+    "type": "object",
+    "required": ["intent"],
+    "properties": {
+      "intent": { "type": "string" },
+      "language": { "type": "string" }
+    }
+  }
+}
+```
+
 ## Indexed frameworks
 
 - LangChain (`langchain`) — Python/JS LCEL, agents, LangGraph notes
@@ -117,4 +211,4 @@ Refresh: nightly in production when the index is older than 24 hours. Local: `np
 
 ## Agent notes
 
-Keep tool arguments short. Responses are already truncated for context windows (top hits, ~1.2k chars/chunk). Prefer `fetch_latest_syntax` before pasting large docs into a prompt.
+Keep tool arguments short. Responses are already truncated for context windows (top hits, ~1.2k chars/chunk). Prefer `fetch_latest_syntax` or `working_example` before pasting large docs into a prompt. Lint with `review_framework_code` before running agent-written code.

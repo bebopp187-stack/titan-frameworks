@@ -1,0 +1,79 @@
+[
+  {
+    "intent": "payment",
+    "aliases": ["pay", "send xrp", "xrp payment"],
+    "transactionType": "Payment",
+    "requiredFields": ["TransactionType", "Account", "Destination", "Amount"],
+    "failureCodes": [
+      "temBAD_AMOUNT — Amount is not a drops string or IOU object",
+      "tecUNFUNDED_PAYMENT — sender lacks spendable XRP",
+      "actMalformed — Destination is not a classic r-address"
+    ],
+    "notes": [
+      "Do not submit from this tool. Autofill Fee/Sequence/LastLedgerSequence on a connected Client.",
+      "Native XRP Amount is a drops string via xrpToDrops. Never a JS number."
+    ],
+    "skeletons": {
+      "typescript": "import { Client, Wallet, xrpToDrops } from \"xrpl\";\n\nconst tx = {\n  TransactionType: \"Payment\" as const,\n  Account: wallet.classicAddress,\n  Destination: \"rDestination...\",\n  Amount: xrpToDrops(\"0.001\"),\n};\nconst prepared = await client.autofill(tx);\n// const result = await client.submitAndWait(prepared, { wallet });",
+      "python": "from xrpl.models.transactions import Payment\nfrom xrpl.utils import xrp_to_drops\n\ntx = Payment(\n    account=wallet.classic_address,\n    destination=\"rDestination...\",\n    amount=xrp_to_drops(\"0.001\"),\n)\n# submit_and_wait(tx, client, wallet)"
+    }
+  },
+  {
+    "intent": "trustline",
+    "aliases": ["trust set", "trustline", "iou trust"],
+    "transactionType": "TrustSet",
+    "requiredFields": ["TransactionType", "Account", "LimitAmount"],
+    "failureCodes": [
+      "temBAD_LIMIT — LimitAmount currency/issuer/value malformed",
+      "tecNO_LINE_INSUF_RESERVE — not enough XRP reserve for a new line"
+    ],
+    "notes": [
+      "LimitAmount.currency is 40-hex for codes longer than 3 characters (RLUSD → 524C555344…).",
+      "Receiver needs a matching trust line (or rippling) before they can be paid an IOU."
+    ],
+    "skeletons": {
+      "typescript": "import { Client, Wallet } from \"xrpl\";\n\nconst tx = {\n  TransactionType: \"TrustSet\" as const,\n  Account: wallet.classicAddress,\n  LimitAmount: {\n    currency: \"USD\",\n    issuer: \"rIssuer...\",\n    value: \"1000\",\n  },\n};\nconst prepared = await client.autofill(tx);",
+      "python": "from xrpl.models.transactions import TrustSet\nfrom xrpl.models.amounts import IssuedCurrencyAmount\n\ntx = TrustSet(\n    account=wallet.classic_address,\n    limit_amount=IssuedCurrencyAmount(currency=\"USD\", issuer=\"rIssuer...\", value=\"1000\"),\n)"
+    }
+  },
+  {
+    "intent": "rlusd",
+    "aliases": ["rlusd", "ripple usd", "stablecoin"],
+    "transactionType": "Payment",
+    "requiredFields": ["TransactionType", "Account", "Destination", "Amount"],
+    "failureCodes": [
+      "tecPATH_DRY — no trust line / rippling path to the destination",
+      "temBAD_AMOUNT — currency must be 40-hex RLUSD, not the ASCII string",
+      "tecNO_AUTH — issuer requires authorization"
+    ],
+    "notes": [
+      "Mainnet RLUSD issuer is rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De.",
+      "TrustSet the hex currency on the destination before Payment.",
+      "This tool does not submit or move funds."
+    ],
+    "skeletons": {
+      "typescript": "import { Client, Wallet } from \"xrpl\";\n\nconst RLUSD = \"524C555344000000000000000000000000000000\";\nconst issuer = \"rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De\";\nconst trust = {\n  TransactionType: \"TrustSet\" as const,\n  Account: wallet.classicAddress,\n  LimitAmount: { currency: RLUSD, issuer, value: \"1000\" },\n};\nconst pay = {\n  TransactionType: \"Payment\" as const,\n  Account: wallet.classicAddress,\n  Destination: \"rPayee...\",\n  Amount: { currency: RLUSD, issuer, value: \"0.001\" },\n};\n// await client.submitAndWait(await client.autofill(trust), { wallet });\n// await client.submitAndWait(await client.autofill(pay), { wallet });",
+      "python": "from xrpl.models.transactions import TrustSet, Payment\nfrom xrpl.models.amounts import IssuedCurrencyAmount\n\nRLUSD = \"524C555344000000000000000000000000000000\"\nissuer = \"rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De\"\ntrust = TrustSet(\n    account=wallet.classic_address,\n    limit_amount=IssuedCurrencyAmount(currency=RLUSD, issuer=issuer, value=\"1000\"),\n)\npay = Payment(\n    account=wallet.classic_address,\n    destination=\"rPayee...\",\n    amount=IssuedCurrencyAmount(currency=RLUSD, issuer=issuer, value=\"0.001\"),\n)"
+    }
+  },
+  {
+    "intent": "channel",
+    "aliases": ["payment channel", "paychan", "micropayment channel"],
+    "transactionType": "PaymentChannelCreate",
+    "requiredFields": ["TransactionType", "Account", "Destination", "Amount", "SettleDelay", "PublicKey"],
+    "failureCodes": [
+      "temBAD_AMOUNT — Amount must be drops",
+      "tecUNFUNDED — not enough XRP to fund the channel",
+      "temREDUNDANT — Destination equals Account"
+    ],
+    "notes": [
+      "Channel ID comes from Create metadata; claims use PaymentChannelClaim.",
+      "x402 on XRPL usually uses presigned Payment blobs, not channels, unless you opt into a channel facilitator.",
+      "This tool does not submit."
+    ],
+    "skeletons": {
+      "typescript": "import { Client, Wallet, xrpToDrops } from \"xrpl\";\n\nconst tx = {\n  TransactionType: \"PaymentChannelCreate\" as const,\n  Account: wallet.classicAddress,\n  Destination: \"rPayee...\",\n  Amount: xrpToDrops(\"1\"),\n  SettleDelay: 60,\n  PublicKey: wallet.publicKey,\n};\nconst prepared = await client.autofill(tx);",
+      "python": "from xrpl.models.transactions import PaymentChannelCreate\nfrom xrpl.utils import xrp_to_drops\n\ntx = PaymentChannelCreate(\n    account=wallet.classic_address,\n    destination=\"rPayee...\",\n    amount=xrp_to_drops(\"1\"),\n    settle_delay=60,\n    public_key=wallet.public_key,\n)"
+    }
+  }
+]
