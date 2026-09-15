@@ -5,12 +5,13 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createTitanServer, SERVER_INFO } from "./server.js";
-import { attachX402, paymentRequiredBody, x402MockMiddleware, xrplNetwork, xrplPriceDrops } from "./services/x402.js";
+import { attachX402, paymentRequiredBody, publicMcpResource, x402MockMiddleware, xrplNetwork, xrplPriceDrops } from "./services/x402.js";
 import { projectRoot } from "./services/frameworks.js";
 import { loadDocsIndex } from "./services/docs-store.js";
 import { recordMcpCall } from "./services/earnings.js";
 
 const app = express();
+app.set("trust proxy", 1);
 app.use((req, res, nextFn) => {
   if (
     req.path === "/admin" ||
@@ -77,8 +78,7 @@ app.get("/tools", (_req, res) => {
 });
 
 app.get("/.well-known/x402.json", (req, res) => {
-  const resource = `${req.protocol}://${req.get("host") ?? "localhost"}/mcp`;
-  res.json(paymentRequiredBody(resource));
+  res.json(paymentRequiredBody(publicMcpResource(req)));
 });
 
 app.get("/.well-known/mcp/server-card.json", (_req, res) => {

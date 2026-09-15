@@ -155,6 +155,22 @@ export function paymentRequiredBody(resource: string) {
   };
 }
 
+function firstForwarded(req: Request, name: string): string | undefined {
+  const raw = req.get(name);
+  if (!raw) return undefined;
+  return raw.split(",")[0]?.trim() || undefined;
+}
+
+/** Canonical /mcp URL for x402 requirements (https behind Railway/Vercel). */
+export function publicMcpResource(req: Request): string {
+  const host = firstForwarded(req, "x-forwarded-host") ?? firstForwarded(req, "host") ?? "localhost";
+  const forwardedProto = firstForwarded(req, "x-forwarded-proto");
+  const hostname = host.split(":")[0] ?? host;
+  const hostedHttps = /\.up\.railway\.app$/i.test(hostname) || /\.vercel\.app$/i.test(hostname);
+  const proto = forwardedProto || (hostedHttps ? "https" : req.protocol || "http");
+  return `${proto}://${host}/mcp`;
+}
+
 function paymentProof(req: Request): string | undefined {
   const raw =
     req.header("payment-signature") ??
@@ -263,7 +279,7 @@ export async function x402MockMiddleware(
     return;
   }
   const proof = paymentProof(req);
-  const resource = `${req.protocol}://${req.get("host") ?? "localhost"}${req.originalUrl}`;
+  const resource = publicMcpResource(req);
   if (!proof) {
     const body = paymentRequiredBody(resource);
     res.setHeader("PAYMENT-REQUIRED", Buffer.from(JSON.stringify(body), "utf8").toString("base64"));
