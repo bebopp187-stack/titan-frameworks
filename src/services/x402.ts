@@ -229,7 +229,8 @@ function asV2Requirements(req: unknown): unknown {
   if (!req || typeof req !== "object") return req;
   const r = { ...(req as Record<string, unknown>) };
   const amount = r.amount ?? r.maxAmountRequired;
-  if (amount != null && r.amount == null) r.amount = amount;
+  if (amount != null) r.amount = amount;
+  delete r.maxAmountRequired;
   return r;
 }
 
