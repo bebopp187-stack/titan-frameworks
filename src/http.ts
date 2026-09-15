@@ -90,6 +90,11 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
   res.json(mcpServerCard(SERVER_INFO.version));
 });
 
+app.get("/.well-known/glama.json", (_req, res) => {
+  const file = path.join(projectRoot(), "src/data/glama-connector-claim.json");
+  res.json(JSON.parse(readFileSync(file, "utf8")));
+});
+
 app.all("/mcp", x402MockMiddleware, async (req, res) => {
   const accept = String(req.headers.accept ?? "");
   if (!accept.includes("application/json") || !accept.includes("text/event-stream")) {
